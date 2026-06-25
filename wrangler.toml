@@ -1,0 +1,26 @@
+name = "simplelikes"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# D1 database binding
+# Set D1_DATABASE_ID in your environment or GitHub Secrets
+[[d1_databases]]
+binding = "DB"
+database_name = "simplelikes"
+database_id = "{env.D1_DATABASE_ID}"
+
+# Environment: staging (deployed on push to main)
+[env.staging]
+name = "simplelikes-staging"
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "simplelikes-staging"
+database_id = "{env.D1_STAGING_DATABASE_ID}"
+
+# Environment: production (deployed on tag)
+[env.production]
+name = "simplelikes"
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "simplelikes"
+database_id = "{env.D1_PRODUCTION_DATABASE_ID}"

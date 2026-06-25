@@ -1,0 +1,13 @@
+# Example wrangler.toml — copy to wrangler.toml and fill in your IDs
+name = "simplelikes"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "simplelikes"
+database_id = "<your-d1-database-id>"
+
+# To create the D1 database:
+#   npx wrangler d1 create simplelikes
+# Then copy the database_id from the output.
