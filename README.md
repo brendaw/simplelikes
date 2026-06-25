@@ -13,11 +13,13 @@ A minimal, standalone likes counter API. Drop-in anonymous likes for any static 
 
 - `GET /likes/:slug` — returns current count
 - `POST /likes/:slug` — increments count (with dedup per visitor)
+- `POST /likes/batch` — returns counts for multiple slugs at once
 - CORS whitelist — only your domain can call the API
 - Rate limiting — 10 requests/min per IP
 - Slug validation — prevents path traversal and abuse
 - Anonymous — no login, no user data stored
 - Portable — runs on Cloudflare Workers, Fly.io, or any Node.js host
+- Client script included — drop-in `examples/likes.js` for any static site
 
 ## Quick start
 
@@ -53,6 +55,20 @@ Increments the count and records the visitor. Requires `X-Visitor-Id` header (a 
 
 ```json
 {"slug":"hello-world","count":43,"alreadyLiked":false}
+```
+
+### POST /likes/batch
+
+Returns counts for multiple slugs in a single request. Useful for list pages (home, archive, category) where many items are shown at once.
+
+```bash
+curl -X POST https://simplelikes.workers.dev/likes/batch \
+  -H "Content-Type: application/json" \
+  -d '{"slugs":["hello-world","my-post","note-1"]}'
+```
+
+```json
+{"slugs":{"hello-world":42,"my-post":7,"note-1":0}}
 ```
 
 ### Errors
@@ -107,17 +123,40 @@ simplelikes uses [Hono](https://hono.dev/) as the router, making it portable to 
 | `ALLOWED_ORIGINS` | `https://williambrendaw.com` | Comma-separated list of allowed CORS origins |
 | `D1_DATABASE_ID` | — | Cloudflare D1 database ID |
 
+## Client-side usage
+
+See [`examples/likes.js`](examples/likes.js) for a ready-to-use client script.
+
+```html
+<button class="like-btn" data-slug="hello-world">
+  <span data-counter>0</span> likes
+</button>
+
+<script src="likes.js"></script>
+<script>
+  new LikesClient({ apiUrl: "https://simplelikes.workers.dev" });
+</script>
+```
+
+The script automatically:
+- Loads all like counts on page load via batch endpoint
+- Increments and updates the DOM on click
+- Prevents duplicates via localStorage
+- Adds `.liked` class to already-liked buttons
+
 ## Project structure
 
 ```
 simplelikes/
 ├── src/
-│   ├── index.ts           Worker handler
+│   ├── index.ts           Worker handler (GET, POST, batch)
 │   ├── db/schema.sql      D1 schema
 │   └── utils/
 │       ├── cors.ts        CORS whitelist + security headers
 │       ├── rate-limit.ts  Rate limiting per IP
 │       └── validate.ts    Slug validation
+├── examples/
+│   └── likes.js           Client-side integration example
 ├── test/
 │   └── likes.test.ts
 ├── .github/workflows/

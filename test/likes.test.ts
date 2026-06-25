@@ -30,4 +30,10 @@ describe("validateSlug", () => {
     const { validateSlug } = await import("../src/utils/validate");
     expect(validateSlug("a".repeat(201))).not.toBeNull();
   });
+
+  it("accepts batch-style slugs", async () => {
+    const { validateSlug } = await import("../src/utils/validate");
+    expect(validateSlug("2026/my-article")).toBeNull();
+    expect(validateSlug("category/sub-category/post")).toBeNull();
+  });
 });

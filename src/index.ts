@@ -17,6 +17,13 @@ export default {
     }
 
     const url = new URL(request.url);
+
+    // Route: POST /likes/batch
+    if (request.method === "POST" && url.pathname === "/likes/batch") {
+      return handleBatch(request, env);
+    }
+
+    // Route: GET|POST /likes/:slug
     const slug = url.pathname.replace("/likes/", "");
 
     const slugError = validateSlug(slug);
@@ -57,7 +64,6 @@ async function handlePost(request: Request, env: Env, slug: string): Promise<Res
     return cors.wrap(new Response("X-Visitor-Id header required", { status: 400 }), request);
   }
 
-  // Check if this visitor already liked this slug
   const existing = await env.DB.prepare(
     "SELECT 1 FROM likes_visitors WHERE slug = ? AND visitor_id = ?",
   )
@@ -91,4 +97,50 @@ async function handlePost(request: Request, env: Env, slug: string): Promise<Res
     Response.json({ slug, count: row?.count ?? 1, alreadyLiked: false }),
     request,
   );
+}
+
+async function handleBatch(request: Request, env: Env): Promise<Response> {
+  let body: { slugs?: string[] };
+  try {
+    body = await request.json();
+  } catch {
+    return cors.wrap(new Response("Invalid JSON body", { status: 400 }), request);
+  }
+
+  const slugs = body.slugs;
+  if (!Array.isArray(slugs) || slugs.length === 0 || slugs.length > 50) {
+    return cors.wrap(
+      new Response("slugs must be a non-empty array of up to 50 items", { status: 400 }),
+      request,
+    );
+  }
+
+  for (const slug of slugs) {
+    const error = validateSlug(slug);
+    if (error) {
+      return cors.wrap(new Response(`Invalid slug: ${slug}`, { status: 400 }), request);
+    }
+  }
+
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  if (!rateLimit.check(ip)) {
+    return cors.wrap(new Response("Rate limit exceeded", { status: 429 }), request);
+  }
+
+  const placeholders = slugs.map(() => "?");
+  const { results } = await env.DB.prepare(
+    `SELECT slug, count FROM likes WHERE slug IN (${placeholders.join(",")})`,
+  )
+    .bind(...slugs)
+    .all<{ slug: string; count: number }>();
+
+  const result: Record<string, number> = {};
+  for (const slug of slugs) {
+    result[slug] = 0;
+  }
+  for (const row of results) {
+    result[row.slug] = row.count;
+  }
+
+  return cors.wrap(Response.json({ slugs: result }), request);
 }
