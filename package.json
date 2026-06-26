@@ -4,17 +4,21 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
+    "dev:stop": "pkill -f 'wrangler dev' || echo 'No server running'",
     "deploy": "wrangler deploy",
     "deploy:staging": "wrangler deploy --env staging",
     "deploy:production": "wrangler deploy --env production",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "setup": "bash scripts/setup.sh",
+    "db:migrate": "wrangler d1 execute simplelikes --remote --file=src/db/schema.sql && wrangler d1 execute simplelikes-staging --remote --file=src/db/schema.sql",
     "changelog": "bash scripts/changelog.sh",
     "release": "bash scripts/release.sh"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",
+    "typescript": "^5.0.0",
     "vitest": "^3.0.0",
     "wrangler": "^4.0.0"
   }
