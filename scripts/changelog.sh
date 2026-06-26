@@ -59,9 +59,7 @@ if grep -q "^## \[$VERSION\]" "$CHANGELOG"; then
 	collect_commits_to_file "$LATEST_TAG" "HEAD" "$tmp_content"
 
 	if [[ ! -s "$tmp_content" ]]; then
-		echo "changelog: no releasable commits since $LATEST_TAG."
-		rm "$tmp_content"
-		exit 0
+		printf '### Added\n\n- Nothing yet\n\n' > "$tmp_content"
 	fi
 
 	tmp_cl=$(mktemp)
@@ -107,6 +105,14 @@ else
 		}
 		in_u { next }
 		{ print }
+		END {
+			if (in_u) {
+				print ""
+				print header
+				print ""
+				while ((getline line < cf) > 0) print line
+			}
+		}
 	' "$CHANGELOG" > "$tmp_cl"
 	mv "$tmp_cl" "$CHANGELOG"
 	rm "$tmp_content"
