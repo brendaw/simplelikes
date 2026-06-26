@@ -421,4 +421,181 @@ describe("handler", () => {
     const blockedRes = await handler.fetch(blockedReq, env);
     expect(blockedRes.status).toBe(429);
   });
+
+  it("Global GET rate limit returns 429 with Retry-After header", async () => {
+    const handler = await createHandler();
+    const stmt = createMockStmt();
+    stmt.first.mockResolvedValue({ count: 0 });
+    const env = { DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn() } as any };
+
+    for (let i = 0; i < 500; i++) {
+      const req = new Request(`http://localhost/likes/slug-${i}`, {
+        headers: { "CF-Connecting-IP": `ip-${i}` },
+      });
+      const res = await handler.fetch(req, env);
+      expect(res.status).toBe(200);
+    }
+
+    const blockedReq = new Request("http://localhost/likes/blocked", {
+      headers: { "CF-Connecting-IP": "unique-ip" },
+    });
+    const blockedRes = await handler.fetch(blockedReq, env);
+    expect(blockedRes.status).toBe(429);
+    expect(blockedRes.headers.get("Retry-After")).toBeTruthy();
+    expect(blockedRes.headers.get("Retry-After")).toMatch(/^\d+$/);
+  });
+
+  it("Global POST rate limit returns 429 with Retry-After header", async () => {
+    const handler = await createHandler();
+    const stmt = createMockStmt();
+    stmt.first
+      .mockResolvedValue(null)
+      .mockResolvedValue({ count: 1 });
+    const env = {
+      DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn().mockResolvedValue([]) } as any,
+    };
+
+    for (let i = 0; i < 50; i++) {
+      const req = new Request(`http://localhost/likes/slug-${i}`, {
+        method: "POST",
+        headers: {
+          "X-Visitor-Id": `visitor-${i}`,
+          "CF-Connecting-IP": `ip-${i}`,
+        },
+      });
+      const res = await handler.fetch(req, env);
+      expect(res.status).toBe(200);
+    }
+
+    const blockedReq = new Request("http://localhost/likes/blocked", {
+      method: "POST",
+      headers: {
+        "X-Visitor-Id": "new-visitor",
+        "CF-Connecting-IP": "unique-ip",
+      },
+    });
+    const blockedRes = await handler.fetch(blockedReq, env);
+    expect(blockedRes.status).toBe(429);
+    expect(blockedRes.headers.get("Retry-After")).toBeTruthy();
+  });
+
+  it("Integration test bypasses global GET rate limit", async () => {
+    const handler = await createHandler();
+    const stmt = createMockStmt();
+    stmt.first.mockResolvedValue({ count: 0 });
+    const env = {
+      DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn() } as any,
+      INTEGRATION_TEST_SECRET: "test-secret",
+    };
+
+    for (let i = 0; i < 600; i++) {
+      const req = new Request(`http://localhost/likes/slug-${i}`, {
+        headers: {
+          "X-Integration-Test": "test-secret",
+          "CF-Connecting-IP": `ip-${i}`,
+        },
+      });
+      const res = await handler.fetch(req, env);
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it("Integration test bypasses global POST rate limit", async () => {
+    const handler = await createHandler();
+    const stmt = createMockStmt();
+    stmt.first
+      .mockResolvedValue(null)
+      .mockResolvedValue({ count: 1 });
+    const env = {
+      DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn().mockResolvedValue([]) } as any,
+      INTEGRATION_TEST_SECRET: "test-secret",
+    };
+
+    for (let i = 0; i < 100; i++) {
+      const req = new Request(`http://localhost/likes/slug-${i}`, {
+        method: "POST",
+        headers: {
+          "X-Integration-Test": "test-secret",
+          "X-Visitor-Id": `visitor-${i}`,
+          "CF-Connecting-IP": `ip-${i}`,
+        },
+      });
+      const res = await handler.fetch(req, env);
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it("Batch global rate limit counts against GET limit", async () => {
+    const handler = await createHandler();
+    const stmt = createMockStmt();
+    stmt.all.mockResolvedValue({ results: [] });
+    const env = { DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn() } as any };
+
+    for (let i = 0; i < 500; i++) {
+      const req = new Request("http://localhost/likes/batch", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "CF-Connecting-IP": `ip-${i}`,
+        },
+        body: JSON.stringify({ slugs: ["a"] }),
+      });
+      const res = await handler.fetch(req, env);
+      expect(res.status).toBe(200);
+    }
+
+    const blockedReq = new Request("http://localhost/likes/batch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "CF-Connecting-IP": "unique-ip",
+      },
+      body: JSON.stringify({ slugs: ["a"] }),
+    });
+    const blockedRes = await handler.fetch(blockedReq, env);
+    expect(blockedRes.status).toBe(429);
+    expect(blockedRes.headers.get("Retry-After")).toBeTruthy();
+  });
+
+  it("Batch with integration test bypasses global GET rate limit", async () => {
+    const handler = await createHandler();
+    const stmt = createMockStmt();
+    stmt.all.mockResolvedValue({ results: [] });
+    const env = {
+      DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn() } as any,
+      INTEGRATION_TEST_SECRET: "test-secret",
+    };
+
+    for (let i = 0; i < 600; i++) {
+      const req = new Request("http://localhost/likes/batch", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Integration-Test": "test-secret",
+          "CF-Connecting-IP": `ip-${i}`,
+        },
+        body: JSON.stringify({ slugs: ["a"] }),
+      });
+      const res = await handler.fetch(req, env);
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it("Per-IP rate limit still applies before global limit", async () => {
+    const handler = await createHandler();
+    const stmt = createMockStmt();
+    stmt.first.mockResolvedValue({ count: 0 });
+    const env = { DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn() } as any };
+
+    for (let i = 0; i < 10; i++) {
+      const req = new Request(`http://localhost/likes/slug-${i}`);
+      const res = await handler.fetch(req, env);
+      expect(res.status).toBe(200);
+    }
+
+    const blockedReq = new Request("http://localhost/likes/blocked");
+    const blockedRes = await handler.fetch(blockedReq, env);
+    expect(blockedRes.status).toBe(429);
+    expect(blockedRes.headers.get("Retry-After")).toBeNull();
+  });
 });

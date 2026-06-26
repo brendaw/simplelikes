@@ -50,4 +50,77 @@ describe("rateLimit", () => {
     expect(rateLimit.check("busy-ip")).toBe(false);
     expect(rateLimit.check("other-ip")).toBe(true);
   });
+
+  // Global rate limit tests
+
+  it("allows first global GET request", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    expect(rateLimit.checkGlobal("GET")).toBe(true);
+  });
+
+  it("allows first global POST request", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    expect(rateLimit.checkGlobal("POST")).toBe(true);
+  });
+
+  it("blocks at 501st global GET request", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    for (let i = 0; i < 500; i++) {
+      rateLimit.checkGlobal("GET");
+    }
+    expect(rateLimit.checkGlobal("GET")).toBe(false);
+  });
+
+  it("blocks at 51st global POST request", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    for (let i = 0; i < 50; i++) {
+      rateLimit.checkGlobal("POST");
+    }
+    expect(rateLimit.checkGlobal("POST")).toBe(false);
+  });
+
+  it("resets global limit after window expires", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    for (let i = 0; i < 500; i++) {
+      rateLimit.checkGlobal("GET");
+    }
+    expect(rateLimit.checkGlobal("GET")).toBe(false);
+
+    vi.advanceTimersByTime(60001);
+
+    expect(rateLimit.checkGlobal("GET")).toBe(true);
+  });
+
+  it("tracks global GET and POST independently", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    for (let i = 0; i < 500; i++) {
+      rateLimit.checkGlobal("GET");
+    }
+    expect(rateLimit.checkGlobal("GET")).toBe(false);
+    expect(rateLimit.checkGlobal("POST")).toBe(true);
+  });
+
+  it("retryAfter returns positive value when limit exceeded", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    for (let i = 0; i < 50; i++) {
+      rateLimit.checkGlobal("POST");
+    }
+    rateLimit.checkGlobal("POST");
+    const retryAfter = rateLimit.retryAfter("POST");
+    expect(retryAfter).toBeGreaterThan(0);
+    expect(retryAfter).toBeLessThanOrEqual(60);
+  });
+
+  it("retryAfter returns 0 when no limit is hit", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    expect(rateLimit.retryAfter("GET")).toBe(0);
+  });
+
+  it("global rate limit does not affect per-IP tracking", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    for (let i = 0; i < 500; i++) {
+      rateLimit.checkGlobal("GET");
+    }
+    expect(rateLimit.check("fresh-ip")).toBe(true);
+  });
 });
