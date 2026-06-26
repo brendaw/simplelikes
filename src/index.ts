@@ -49,6 +49,14 @@ export default {
       return c.wrap(new Response(slugError, { status: 400 }), request);
     }
 
+    if (!isTest && (request.method === "GET" || request.method === "POST")) {
+      if (!rateLimit.checkGlobal(request.method)) {
+        const retryAfter = rateLimit.retryAfter(request.method);
+        const res = new Response("Global rate limit exceeded", { status: 429, headers: { "Retry-After": String(retryAfter) } });
+        return c.wrap(res, request);
+      }
+    }
+
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
     if (!rateLimit.check(ip) && !isTest) {
       return c.wrap(new Response("Rate limit exceeded", { status: 429 }), request);
@@ -155,6 +163,13 @@ async function handleBatch(
     if (error) {
       return c.wrap(new Response(`Invalid slug: ${slug}`, { status: 400 }), request);
     }
+  }
+
+  // Global rate limit — batch is a read operation, counts against GET limit
+  if (!isTest && !rateLimit.checkGlobal("GET")) {
+    const retryAfter = rateLimit.retryAfter("GET");
+    const res = new Response("Global rate limit exceeded", { status: 429, headers: { "Retry-After": String(retryAfter) } });
+    return c.wrap(res, request);
   }
 
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
