@@ -5,10 +5,22 @@ import { validateSlug } from "./utils/validate";
 interface Env {
   DB: D1Database;
   ALLOWED_ORIGINS?: string;
+  INTEGRATION_TEST_SECRET?: string;
 }
 
 interface LikeRow {
   count: number;
+}
+
+function checkIntegrationTest(request: Request, env: Env): { reject?: Response; isTest: boolean } {
+  const secret = env.INTEGRATION_TEST_SECRET;
+  if (!secret) return { isTest: false };
+
+  const header = request.headers.get("X-Integration-Test");
+  if (header === secret) return { isTest: true };
+  if (header) return { reject: new Response("Invalid integration test secret", { status: 401 }), isTest: false };
+
+  return { isTest: false };
 }
 
 export default {
@@ -26,6 +38,9 @@ export default {
       return handleBatch(request, env, c);
     }
 
+    const { reject, isTest } = checkIntegrationTest(request, env);
+    if (reject) return c.wrap(reject, request);
+
     // Route: GET|POST /likes/:slug
     const slug = url.pathname.replace("/likes/", "");
 
@@ -35,7 +50,7 @@ export default {
     }
 
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-    if (!rateLimit.check(ip)) {
+    if (!rateLimit.check(ip) && !isTest) {
       return c.wrap(new Response("Rate limit exceeded", { status: 429 }), request);
     }
 
@@ -117,6 +132,9 @@ async function handleBatch(
   env: Env,
   c: ReturnType<typeof cors.create>,
 ): Promise<Response> {
+  const { reject, isTest } = checkIntegrationTest(request, env);
+  if (reject) return c.wrap(reject, request);
+
   let body: { slugs?: string[] };
   try {
     body = await request.json();
@@ -140,7 +158,7 @@ async function handleBatch(
   }
 
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-  if (!rateLimit.check(ip)) {
+  if (!rateLimit.check(ip) && !isTest) {
     return c.wrap(new Response("Rate limit exceeded", { status: 429 }), request);
   }
 
