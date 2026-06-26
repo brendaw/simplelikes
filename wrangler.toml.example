@@ -8,6 +8,23 @@ binding = "DB"
 database_name = "simplelikes"
 database_id = "<your-d1-database-id>"
 
-# To create the D1 database:
-#   npx wrangler d1 create simplelikes
-# Then copy the database_id from the output.
+# Environment: staging (deployed on push to main)
+[env.staging]
+name = "simplelikes-staging"
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "simplelikes-staging"
+database_id = "<your-staging-database-id>"
+
+# Environment: production (deployed on tag)
+[env.production]
+name = "simplelikes"
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "simplelikes"
+database_id = "<your-production-database-id>"
+
+# To create the D1 databases:
+#   wrangler d1 create simplelikes
+#   wrangler d1 create simplelikes-staging
+# Then copy the database_ids from the output.

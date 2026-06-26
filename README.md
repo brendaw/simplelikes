@@ -95,17 +95,37 @@ simplelikes is designed with defense in depth:
 
 ### Cloudflare Workers + D1 (recommended)
 
-1. Create the D1 database:
+#### Prerequisites
+
+1. Install Wrangler CLI:
    ```bash
-   npx wrangler d1 create simplelikes
+   npm install -g wrangler
    ```
 
-2. Apply the schema:
+2. Log in to your Cloudflare account:
    ```bash
-   npx wrangler d1 execute simplelikes --file=src/db/schema.sql
+   wrangler login
    ```
 
-3. Copy `wrangler.toml.example` to `wrangler.toml` and fill in the database ID.
+   This opens your browser to authorize Wrangler. The token is saved locally.
+
+#### Setup
+
+1. Create the D1 databases:
+   ```bash
+   wrangler d1 create simplelikes
+   wrangler d1 create simplelikes-staging
+   ```
+
+   Note the `database_id` output for each — you'll need it in the next step.
+
+2. Copy `wrangler.toml.example` to `wrangler.toml` and fill in the database IDs.
+
+3. Apply the schema:
+   ```bash
+   wrangler d1 execute simplelikes --file=src/db/schema.sql --remote
+   wrangler d1 execute simplelikes-staging --file=src/db/schema.sql --remote
+   ```
 
 4. Deploy:
    ```bash

@@ -9,7 +9,8 @@ For bug reports or feature requests, [open an Issue](https://github.com/brendaw/
 - Node.js 22+
 - npm
 - A Cloudflare account (for deployment; not required for local development)
-- Wrangler CLI (installed via `npm install`)
+- Wrangler CLI (install globally: `npm install -g wrangler`)
+- Cloudflare login (`wrangler login`) for database and deployment operations
 
 ## How to contribute
 
