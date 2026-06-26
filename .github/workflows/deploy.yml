@@ -44,8 +44,10 @@ jobs:
         run: |
           cp wrangler.toml.example wrangler.toml
           sed -i "s/__STAGING_DATABASE_ID__/$D1_STAGING_DATABASE_ID/g" wrangler.toml
+          sed -i "s/__INTEGRATION_TEST_SECRET__/$INTEGRATION_TEST_SECRET/g" wrangler.toml
         env:
           D1_STAGING_DATABASE_ID: ${{ secrets.D1_STAGING_DATABASE_ID }}
+          INTEGRATION_TEST_SECRET: ${{ secrets.INTEGRATION_TEST_SECRET }}
 
       - name: Deploy to staging
         run: npm run deploy:staging
