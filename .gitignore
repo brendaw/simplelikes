@@ -4,3 +4,4 @@ dist/
 *.local
 wrangler.toml
 .wrangler/
+coverage/
