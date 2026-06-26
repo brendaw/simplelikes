@@ -3,7 +3,7 @@
   "private": false,
   "type": "module",
   "scripts": {
-    "dev": "if [ -f .env ]; then set -a; . .env; set +a; fi; wrangler dev",
+    "dev": "wrangler dev",
     "dev:stop": "pkill -f 'wrangler dev' || echo 'No server running'",
     "deploy": "wrangler deploy",
     "deploy:staging": "wrangler deploy --env staging",

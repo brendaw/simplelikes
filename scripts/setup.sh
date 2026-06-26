@@ -2,7 +2,6 @@
 set -euo pipefail
 
 WRANGLER_TOML="wrangler.toml"
-ENV_FILE=".env"
 UUID_PATTERN='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 
 if [ -f "$WRANGLER_TOML" ]; then
@@ -34,16 +33,11 @@ fi
 echo "✅ Production DB: $PROD_DB_ID"
 echo "✅ Staging DB:    $STAGING_DB_ID"
 
-echo "📝 Copying $WRANGLER_TOML from example..."
-cp wrangler.toml.example "$WRANGLER_TOML"
+echo "📝 Generating $WRANGLER_TOML..."
+sed -e "s/__STAGING_DATABASE_ID__/$STAGING_DB_ID/g" \
+    -e "s/__PRODUCTION_DATABASE_ID__/$PROD_DB_ID/g" \
+    wrangler.toml.example > "$WRANGLER_TOML"
 echo "✅ $WRANGLER_TOML created."
-
-echo "📝 Generating $ENV_FILE..."
-cat > "$ENV_FILE" << EOF
-D1_DATABASE_ID=$PROD_DB_ID
-ALLOWED_ORIGINS=https://williambrendaw.com
-EOF
-echo "✅ $ENV_FILE created."
 
 echo "🗄️  Applying database schema..."
 npm run db:migrate
@@ -51,4 +45,4 @@ npm run db:migrate
 echo ""
 echo "✅ Setup complete!"
 echo "   Run 'npm run dev' to start the development server."
-echo "   Run 'npm run deploy -- --env staging' for staging deploy."
+echo "   Run 'npm run deploy:staging' for staging deploy."
