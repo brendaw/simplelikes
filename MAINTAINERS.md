@@ -79,6 +79,18 @@ INTEGRATION_TEST_SECRET=$(grep INTEGRATION_TEST_SECRET .env | cut -d= -f2) npm r
 
 Os testes são pulados automaticamente se `INTEGRATION_TEST_SECRET` não estiver definida, evitando que forks ou contribuidores acidentalmente batam na staging.
 
+## Cobertura de código
+
+O projeto usa `@vitest/coverage-v8` com threshold mínimo de **90%** em statements, branches, functions e lines.
+
+**Executar:**
+
+```bash
+npm run test:coverage
+```
+
+O coverage é verificado automaticamente no CI — o build quebra se o threshold não for atingido. Atualmente a base de código está em **100% de coverage**.
+
 ---
 
 *Este documento é vivo e será atualizado conforme o projeto evolui.*

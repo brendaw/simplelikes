@@ -191,6 +191,7 @@ The script automatically:
 | `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |
 | `npm test` | Run unit tests |
+| `npm run test:coverage` | Run unit tests with coverage report (threshold: 90%) |
 | `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET`) |
 | `npm run changelog` | Refresh CHANGELOG [Unreleased] section |
 | `npm run release` | Cut a new release (tag, changelog, push) |
@@ -211,9 +212,13 @@ simplelikes/
 │       └── validate.ts       Slug validation
 ├── examples/
 │   └── likes.js              Client-side integration example
+├── vitest.config.ts          Vitest config (coverage, thresholds)
 ├── test/
-│   ├── likes.test.ts             Unit tests (validateSlug)
-│   └── integration.test.ts       Integration tests against staging
+│   ├── likes.test.ts             Unit: validate utils
+│   ├── rate-limit.test.ts        Unit: rate limit logic
+│   ├── cors.test.ts              Unit: CORS whitelist + security headers
+│   ├── handler.test.ts           Unit: full request routing with mocked D1
+│   └── integration.test.ts       Integration against staging
 ├── .github/
 │   ├── CODEOWNERS            Required reviewer (@brendaw)
 │   ├── FUNDING.yml           Support links
@@ -242,7 +247,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow — bug fixe
 
 Before opening a PR, run:
 ```bash
-npm run typecheck && npm test
+npm run typecheck && npm run test:coverage
 ```
 
 ## License
