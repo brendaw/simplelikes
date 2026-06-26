@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0](https://github.com/brendaw/simplelikes/releases/tag/v0.2.0) - 2026-06-26
+
+### Added
+
+- Add integration test guard with X-Integration-Test header > > Introduce INTEGRATION_TEST_SECRET env to protect the staging > endpoint from unauthorized requests. Requests with a valid > X-Integration-Test header bypass rate limiting. Requests with > an invalid secret return 401.
+
+### Changed
+
+- Add unit tests for 100% code coverage
+- Add coverage check with v8 provider and 90% threshold
+- Add integration test references to README and contributing guide
+- Auto-load INTEGRATION_TEST_SECRET from .env for test:integration
+- Add integration test npm script and maintainer docs
+- Add integration tests against staging
+- Add INTEGRATION_TEST_SECRET to .env.example
+- Inject INTEGRATION_TEST_SECRET into staging wrangler.toml
+- Add INTEGRATION_TEST_SECRET placeholder to wrangler.toml.example
+
 ## [0.1.6](https://github.com/brendaw/simplelikes/releases/tag/v0.1.6) - 2026-06-26
 
 ### Fixed
