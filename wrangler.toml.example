@@ -1,4 +1,4 @@
-# Example wrangler.toml — copy to wrangler.toml and fill in your IDs
+# Wrangler configuration — copy to wrangler.toml and fill in your IDs
 name = "simplelikes"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
@@ -6,7 +6,7 @@ compatibility_date = "2025-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "simplelikes"
-database_id = "<your-d1-database-id>"
+database_id = "{env.D1_DATABASE_ID}"
 
 # Environment: staging (deployed on push to main)
 [env.staging]
@@ -14,7 +14,7 @@ name = "simplelikes-staging"
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "simplelikes-staging"
-database_id = "<your-staging-database-id>"
+database_id = "{env.D1_STAGING_DATABASE_ID}"
 
 # Environment: production (deployed on tag)
 [env.production]
@@ -22,7 +22,7 @@ name = "simplelikes"
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "simplelikes"
-database_id = "<your-production-database-id>"
+database_id = "{env.D1_PRODUCTION_DATABASE_ID}"
 
 # To create the D1 databases:
 #   wrangler d1 create simplelikes
