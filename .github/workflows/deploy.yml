@@ -45,9 +45,11 @@ jobs:
           cp wrangler.toml.example wrangler.toml
           sed -i "s/__STAGING_DATABASE_ID__/$D1_STAGING_DATABASE_ID/g" wrangler.toml
           sed -i "s/__INTEGRATION_TEST_SECRET__/$INTEGRATION_TEST_SECRET/g" wrangler.toml
+          sed -i "s/__ALLOWED_ORIGINS__/$ALLOWED_ORIGINS/g" wrangler.toml
         env:
           D1_STAGING_DATABASE_ID: ${{ secrets.D1_STAGING_DATABASE_ID }}
           INTEGRATION_TEST_SECRET: ${{ secrets.INTEGRATION_TEST_SECRET }}
+          ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
 
       - name: Deploy to staging
         run: npm run deploy:staging
@@ -75,8 +77,10 @@ jobs:
         run: |
           cp wrangler.toml.example wrangler.toml
           sed -i "s/__PRODUCTION_DATABASE_ID__/$D1_PRODUCTION_DATABASE_ID/g" wrangler.toml
+          sed -i "s/__ALLOWED_ORIGINS__/$ALLOWED_ORIGINS/g" wrangler.toml
         env:
           D1_PRODUCTION_DATABASE_ID: ${{ secrets.D1_PRODUCTION_DATABASE_ID }}
+          ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
 
       - name: Deploy to production
         run: npm run deploy:production

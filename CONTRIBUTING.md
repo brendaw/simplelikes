@@ -85,7 +85,7 @@ The repository includes an `.editorconfig` file. Most editors support it nativel
 ## Scripts
 
 | Script | Purpose |
-|---|---|---|
+|---|---|
 | `npm run dev` | Start local dev server (loads `.env` automatically) |
 | `npm run dev:stop` | Stop local dev server |
 | `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |

@@ -142,10 +142,12 @@ simplelikes can be adapted to any JavaScript runtime that supports SQLite or HTT
 
 ### Environment variables
 
-| Env var | Default | Description |
+| Env var | Required | Description |
 |---|---|---|
-| `ALLOWED_ORIGINS` | `https://williambrendaw.com` | Comma-separated list of allowed CORS origins |
-| `D1_DATABASE_ID` | — | Cloudflare D1 database ID |
+| `ALLOWED_ORIGINS` | No† | Comma-separated list of allowed CORS origins |
+| `D1_DATABASE_ID` | No | Cloudflare D1 database ID (auto-detected by Wrangler) |
+
+> † When omitted, no CORS headers are added to responses. For local dev, set in `.env`. For deployed workers, configure via `wrangler.toml [vars]` or Cloudflare dashboard.
 
 ### Local configuration
 
@@ -184,7 +186,7 @@ The script automatically:
 ## Scripts
 
 | Script | Purpose |
-|---|---|---|
+|---|---|
 | `npm run dev` | Start local dev server (loads `.env` automatically) |
 | `npm run dev:stop` | Stop local dev server |
 | `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |

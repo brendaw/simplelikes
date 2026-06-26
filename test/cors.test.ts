@@ -1,15 +1,26 @@
 import { describe, it, expect } from "vitest";
 
 describe("cors", () => {
-  it("create uses default origin when none provided", async () => {
+  it("create with no origin returns empty set (no CORS)", async () => {
     const { cors } = await import("../src/utils/cors");
     const c = cors.create();
 
     const req = new Request("http://localhost/test", {
-      headers: { Origin: "https://williambrendaw.com" },
+      headers: { Origin: "https://any-site.com" },
     });
     const res = c.handlePreflight(req);
-    expect(res.headers.get("access-control-allow-origin")).toBe("https://williambrendaw.com");
+    expect(res.headers.get("access-control-allow-origin")).toBeNull();
+  });
+
+  it("create accepts a single origin", async () => {
+    const { cors } = await import("../src/utils/cors");
+    const c = cors.create("https://mysite.com");
+
+    const req = new Request("http://localhost/test", {
+      headers: { Origin: "https://mysite.com" },
+    });
+    const res = c.handlePreflight(req);
+    expect(res.headers.get("access-control-allow-origin")).toBe("https://mysite.com");
   });
 
   it("create accepts custom allowed origins", async () => {

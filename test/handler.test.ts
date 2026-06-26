@@ -237,13 +237,16 @@ describe("handler", () => {
 
     const req = new Request("http://localhost/likes/hello", {
       method: "OPTIONS",
-      headers: { Origin: "https://williambrendaw.com" },
+      headers: { Origin: "https://mysite.com" },
     });
-    const env = { DB: { prepare: vi.fn(), batch: vi.fn() } as any };
+    const env = {
+      DB: { prepare: vi.fn(), batch: vi.fn() } as any,
+      ALLOWED_ORIGINS: "https://mysite.com",
+    };
 
     const res = await handler.fetch(req, env);
     expect(res.status).toBe(204);
-    expect(res.headers.get("access-control-allow-origin")).toBe("https://williambrendaw.com");
+    expect(res.headers.get("access-control-allow-origin")).toBe("https://mysite.com");
   });
 
   it("Returns 405 for unsupported method", async () => {

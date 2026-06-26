@@ -1,9 +1,7 @@
 function create(allowedOrigins?: string) {
-  const origins = new Set(
-    (allowedOrigins || "https://williambrendaw.com")
-      .split(",")
-      .map((o) => o.trim()),
-  );
+  const origins = allowedOrigins
+    ? new Set(allowedOrigins.split(",").map((o) => o.trim()))
+    : new Set<string>();
 
   function getOrigin(request: Request): string | null {
     const origin = request.headers.get("Origin");

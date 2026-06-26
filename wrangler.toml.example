@@ -16,6 +16,7 @@ database_name = "simplelikes-staging"
 database_id = "__STAGING_DATABASE_ID__"
 [env.staging.vars]
 INTEGRATION_TEST_SECRET = "__INTEGRATION_TEST_SECRET__"
+ALLOWED_ORIGINS = "__ALLOWED_ORIGINS__"
 
 [env.production]
 name = "simplelikes"
@@ -23,3 +24,5 @@ name = "simplelikes"
 binding = "DB"
 database_name = "simplelikes"
 database_id = "__PRODUCTION_DATABASE_ID__"
+[env.production.vars]
+ALLOWED_ORIGINS = "__ALLOWED_ORIGINS__"
