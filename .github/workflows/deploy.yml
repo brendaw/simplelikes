@@ -4,14 +4,32 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  validate:
+    uses: ./.github/workflows/ci.yml
+
+  deploy-staging:
+    needs: validate
+    if: >
+      github.ref_type == 'branch' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
     runs-on: ubuntu-24.04
+    environment: staging
     steps:
       - uses: actions/checkout@v4
 
@@ -25,15 +43,33 @@ jobs:
       - name: Generate wrangler.toml from example
         run: cp wrangler.toml.example wrangler.toml
 
-      - name: Deploy staging (push to main)
-        if: github.ref_type == 'branch'
+      - name: Deploy to staging
         run: npm run deploy:staging
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           D1_STAGING_DATABASE_ID: ${{ secrets.D1_STAGING_DATABASE_ID }}
 
-      - name: Deploy production (tag)
-        if: github.ref_type == 'tag'
+  deploy-production:
+    needs: validate
+    if: >
+      github.ref_type == 'tag' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    runs-on: ubuntu-24.04
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate wrangler.toml from example
+        run: cp wrangler.toml.example wrangler.toml
+
+      - name: Deploy to production
         run: npm run deploy:production
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

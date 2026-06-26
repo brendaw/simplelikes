@@ -7,12 +7,21 @@ This document describes the release process for maintainers of simplelikes.
 | Script | Purpose |
 |---|---|
 | `npm run dev` | Start local dev server for development testing |
+| `npm run typecheck` | TypeScript type checking |
 | `npm test` | Run test suite |
 | `npm run deploy` | Deploy to default environment |
 | `npm run deploy:staging` | Deploy to staging |
 | `npm run deploy:production` | Deploy to production |
 | `scripts/release.sh` | Orchestrates the full release: version detection, changelog generation, commit, tag, and push |
 | `scripts/changelog.sh` | Generates CHANGELOG entries from conventional commits; run standalone to refresh [Unreleased] or during release workflow |
+
+## CI/CD pipeline
+
+| Workflow | Triggers | Description |
+|---|---|---|
+| `ci.yml` | Called by deploy/release workflows | Type check + unit tests |
+| `deploy.yml` | Push to `main`, push to tag, `workflow_dispatch` | Validates via CI, then deploys to staging (branch) or production (tag) |
+| `release.yml` | Push to tag, `workflow_dispatch` | Validates via CI, then creates GitHub Release from CHANGELOG |
 
 ### Lifecycle
 
@@ -21,6 +30,13 @@ This document describes the release process for maintainers of simplelikes.
 | Development — test changes locally after each edit | Contributor | `npm run dev` |
 | Pre-PR validation — run tests before opening a PR | Contributor | `npm test` |
 | Release — when ready to publish a new version | Maintainer | `scripts/release.sh` |
+
+### Manual triggers
+
+Both Deploy and Release workflows support `workflow_dispatch` for manual execution:
+
+- **Deploy:** Choose environment (`staging` or `production`) to deploy without a git push
+- **Release:** Enter a tag (e.g. `v0.1.0`) to (re)generate a GitHub Release for that tag
 
 ## Creating a release
 
