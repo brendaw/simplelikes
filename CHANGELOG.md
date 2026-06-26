@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Added
+## [0.1.4](https://github.com/brendaw/simplelikes/releases/tag/v0.1.4) - 2026-06-26
 
-- Nothing yet
+### Fixed
+
+- Changelog.sh now writes "Nothing yet" when [Unreleased] has no commits
+
+### Changed
+
+- Add npm scripts for changelog/release and sync docs with project structure
+- Restructure workflows with reusable CI pipeline and manual dispatch
+- Reorder CHANGELOG entries descending and add empty-state placeholder
 
 ## [0.1.3](https://github.com/brendaw/simplelikes/releases/tag/v0.1.3) - 2026-06-26
 
