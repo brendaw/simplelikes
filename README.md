@@ -2,7 +2,9 @@
   <img src="https://badgen.net/github/license/brendaw/simplelikes">
   <img src="https://badgen.net/badge/status/active/green">
   <img src="https://img.shields.io/badge/Cloudflare-Workers%20%2B%20D1-F38020?logo=cloudflare&logoColor=white">
+  <a href="https://github.com/brendaw/simplelikes/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/brendaw/simplelikes/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/brendaw/simplelikes/actions/workflows/deploy.yml"><img alt="Deploy" src="https://github.com/brendaw/simplelikes/actions/workflows/deploy.yml/badge.svg"></a>
+  <a href="https://github.com/brendaw/simplelikes/issues"><img alt="Issues" src="https://badgen.net/github/open-issues/brendaw/simplelikes"></a>
 </p>
 
 # simplelikes
@@ -119,7 +121,7 @@ simplelikes is designed with defense in depth:
 
    Note the `database_id` output for each — you'll need it in the next step.
 
-2. Copy `wrangler.toml.example` to `wrangler.toml` and fill in the database IDs.
+2. Copy `wrangler.toml.example` to `wrangler.toml` (gitignored) and fill in the database IDs.
 
 3. Apply the schema:
    ```bash
@@ -134,14 +136,26 @@ simplelikes is designed with defense in depth:
 
 ### Other platforms
 
-simplelikes uses [Hono](https://hono.dev/) as the router, making it portable to any platform that supports JavaScript runtimes. See the [Hono deployment docs](https://hono.dev/docs/#deploy) for Fly.io, Deno, Bun, and more.
+simplelikes can be adapted to any JavaScript runtime that supports SQLite or HTTP request handling. See issues [#8](https://github.com/brendaw/simplelikes/issues/8) (Fly.io) and [#9](https://github.com/brendaw/simplelikes/issues/9) (Supabase) for planned deployment adapters.
 
 ## Configuration
+
+### Environment variables
 
 | Env var | Default | Description |
 |---|---|---|
 | `ALLOWED_ORIGINS` | `https://williambrendaw.com` | Comma-separated list of allowed CORS origins |
 | `D1_DATABASE_ID` | — | Cloudflare D1 database ID |
+
+### Local configuration
+
+`wrangler.toml` is gitignored. Copy the template and fill in your IDs:
+
+```bash
+cp wrangler.toml.example wrangler.toml
+```
+
+The template includes placeholders for `database_id` in all three environments (default, staging, production).
 
 ## Client-side usage
 
@@ -164,31 +178,62 @@ The script automatically:
 - Prevents duplicates via localStorage
 - Adds `.liked` class to already-liked buttons
 
+## Scripts
+
+| Script | Purpose |
+|---|---|
+| `npm run dev` | Start local dev server |
+| `npm run typecheck` | TypeScript type checking |
+| `npm test` | Run tests |
+| `npm run changelog` | Refresh CHANGELOG [Unreleased] section |
+| `npm run release` | Cut a new release (tag, changelog, push) |
+| `npm run deploy` | Deploy to Cloudflare Workers |
+| `npm run deploy:staging` | Deploy to staging environment |
+| `npm run deploy:production` | Deploy to production environment |
+
 ## Project structure
 
 ```
 simplelikes/
 ├── src/
-│   ├── index.ts           Worker handler (GET, POST, batch)
-│   ├── db/schema.sql      D1 schema
+│   ├── index.ts              Worker handler
+│   ├── db/schema.sql         D1 schema
 │   └── utils/
-│       ├── cors.ts        CORS whitelist + security headers
-│       ├── rate-limit.ts  Rate limiting per IP
-│       └── validate.ts    Slug validation
+│       ├── cors.ts           CORS whitelist + security headers
+│       ├── rate-limit.ts     Rate limiting per IP
+│       └── validate.ts       Slug validation
 ├── examples/
-│   └── likes.js           Client-side integration example
+│   └── likes.js              Client-side integration example
 ├── test/
 │   └── likes.test.ts
-├── .github/workflows/
-│   ├── deploy.yml         Staging on push, production on tag
-│   └── release.yml        GitHub Release on tag
-├── wrangler.toml          CF Workers config
-└── package.json
+├── .github/
+│   ├── CODEOWNERS            Required reviewer (@brendaw)
+│   ├── FUNDING.yml           Support links
+│   ├── ISSUE_TEMPLATE/       Bug report + feature request templates
+│   ├── pull_request_template.md
+│   └── workflows/
+│       ├── ci.yml            Reusable typecheck + tests (workflow_call)
+│       ├── deploy.yml        Staging on push, production on tag + manual dispatch
+│       └── release.yml       GitHub Release on tag + manual dispatch
+├── scripts/
+│   ├── release.sh            Automated release flow
+│   └── changelog.sh          CHANGELOG generation from conventional commits
+├── wrangler.toml.example     Template — copy to wrangler.toml (gitignored)
+├── MAINTAINERS.md            Maintenance policies
+├── CONTRIBUTING.md           Contribution guide
+├── RELEASING.md              Release process
+├── CHANGELOG.md              Version history
+└── AUTHORS.md                Contributors list
 ```
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow. All contributions are welcome.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow — bug fixes, improvements, and new features are welcome.
+
+Before opening a PR, run:
+```bash
+npm run typecheck && npm test
+```
 
 ## License
 

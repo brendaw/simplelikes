@@ -9,7 +9,9 @@
     "deploy:production": "wrangler deploy --env production",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "changelog": "bash scripts/changelog.sh",
+    "release": "bash scripts/release.sh"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",

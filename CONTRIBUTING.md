@@ -41,10 +41,10 @@ For bug reports or feature requests, [open an Issue](https://github.com/brendaw/
 
 4. Make your changes in `src/`.
 
-5. Run tests before opening a PR:
+5. Run type check and tests before opening a PR:
 
    ```bash
-   npm test
+   npm run typecheck && npm test
    ```
 
 6. Open a Pull Request against `main` describing what changed and why.
@@ -87,21 +87,20 @@ The repository includes an `.editorconfig` file. Most editors support it nativel
 | Script | Purpose |
 |---|---|
 | `npm run dev` | Start local dev server with Wrangler |
+| `npm run typecheck` | TypeScript type checking |
 | `npm test` | Run test suite (Vitest) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run deploy` | Deploy to Cloudflare Workers |
 
-`scripts/release.sh` is maintainer-only and is not part of the contributor workflow.
+`scripts/release.sh` and `scripts/changelog.sh` are maintainer-only and are not part of the contributor workflow.
 
 ## CI checks
 
-Every push to `main` and every pull request runs automated checks:
-
-| Check | What it does |
-|---|---|
-| **Deploy** | Deploys to staging on push to `main`; deploys to production on tag push |
-
-Additional CI checks (lint, typecheck) may be added in the future.
+| Workflow | Trigger | Checks |
+|---|---|---|
+| **CI** | Called by deploy/release workflows | Type check + unit tests |
+| **Deploy** | Push to `main`, push to tag, `workflow_dispatch` | Calls CI, then deploys to staging (branch) or production (tag) |
+| **Release** | Push to tag, `workflow_dispatch` | Calls CI, then creates GitHub Release from CHANGELOG |
 
 ---
 
