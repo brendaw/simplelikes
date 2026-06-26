@@ -190,7 +190,8 @@ The script automatically:
 | `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |
 | `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |
-| `npm test` | Run tests |
+| `npm test` | Run unit tests |
+| `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET`) |
 | `npm run changelog` | Refresh CHANGELOG [Unreleased] section |
 | `npm run release` | Cut a new release (tag, changelog, push) |
 | `npm run deploy` | Deploy to Cloudflare Workers |
@@ -211,7 +212,8 @@ simplelikes/
 ├── examples/
 │   └── likes.js              Client-side integration example
 ├── test/
-│   └── likes.test.ts
+│   ├── likes.test.ts             Unit tests (validateSlug)
+│   └── integration.test.ts       Integration tests against staging
 ├── .github/
 │   ├── CODEOWNERS            Required reviewer (@brendaw)
 │   ├── FUNDING.yml           Support links

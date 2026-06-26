@@ -91,11 +91,14 @@ The repository includes an `.editorconfig` file. Most editors support it nativel
 | `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |
 | `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |
-| `npm test` | Run test suite (Vitest) |
+| `npm test` | Run unit tests (Vitest) |
+| `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET`) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run deploy` | Deploy to Cloudflare Workers |
 
 `scripts/release.sh`, `scripts/changelog.sh`, and `scripts/setup.sh` are maintainer-only scripts. The setup is also available via `npm run setup` for contributors with Cloudflare access.
+
+`npm run test:integration` requires a valid `INTEGRATION_TEST_SECRET` and is intended for maintainers only. Contributors without the secret will have these tests skipped automatically.
 
 ## CI checks
 
