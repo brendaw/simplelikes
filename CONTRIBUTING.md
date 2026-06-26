@@ -101,6 +101,57 @@ The repository includes an `.editorconfig` file. Most editors support it nativel
 
 `npm run test:integration` requires a valid `INTEGRATION_TEST_SECRET` and is intended for maintainers only. Contributors without the secret will have these tests skipped automatically.
 
+## API design principles
+
+simplelikes follows a pragmatic REST approach. Understanding these conventions helps keep the API consistent:
+
+### HTTP method semantics
+
+| Method | When to use | Examples |
+|---|---|---|
+| `GET` | Single resource reads — no body, no side effects | `GET /likes/:slug` |
+| `POST` | State-changing operations (writes) | `POST /likes/:slug` (increment) |
+| `POST` (for-read) | Batch reads requiring a body — RFC 9110 §9.3.1 discourages `GET` with body | `POST /likes/batch` |
+
+### Why POST for batch reads?
+
+Sending a JSON body with `GET` is technically allowed by HTTP but:
+
+1. **RFC 9110 §9.3.1** — body in GET has "no generally defined semantics" and is flagged as a request smuggling risk
+2. **CDN/proxy behavior** — intermediaries may strip the body or reject the connection
+3. **Browser fetch API** — `GET` with body works but is non-standard
+
+The `POST`-for-read pattern is well established: Elasticsearch (`POST /_search`), GraphQL (`POST /graphql`), OData (`POST /$batch`), and AWS DynamoDB all use POST for reads with complex input.
+
+### Rate limit categorization
+
+For rate limiting purposes, operations are categorized by **semantics**, not HTTP method:
+
+| Endpoint | Semantics | Counts against |
+|---|---|---|
+| `GET /likes/:slug` | Read | Global GET limit (500/min) |
+| `POST /likes/:slug` | Write | Global POST limit (50/min) |
+| `POST /likes/batch` | Batch read | Global GET limit (500/min) |
+
+This ensures the D1 write quota (100k rows/day on free tier) is protected by the stricter POST limit, while read-heavy batch operations use the more generous GET limit.
+
+### Key constraints
+
+- No `PUT`, `PATCH`, or `DELETE` — the API is intentionally minimal
+- Slugs follow `[a-z0-9/-]` pattern, max 200 chars
+- Max 50 slugs per batch request
+- All responses include CORS and security headers
+- Rate limits return `Retry-After` header with seconds until reset
+
+### When to add a new endpoint
+
+Before adding a new endpoint, ask:
+
+- Could this be done with the existing endpoints? (e.g., `POST /likes/batch` + individual GETs covers most read patterns)
+- Does it need a body / many parameters? → POST-for-read
+- Does it operate on a single resource with just a path param? → GET
+- Is it a write? → POST
+
 ## CI checks
 
 | Workflow | Trigger | Checks |

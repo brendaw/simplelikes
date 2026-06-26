@@ -17,7 +17,7 @@ A minimal, standalone likes counter API. Drop-in anonymous likes for any static 
 - `POST /likes/:slug` — increments count (with dedup per visitor)
 - `POST /likes/batch` — returns counts for multiple slugs at once
 - CORS whitelist — only your domain can call the API
-- Rate limiting — 10 requests/min per IP
+- Rate limiting — per-IP (10 req/min) + global safeguard (500 GET/min, 50 POST/min)
 - Slug validation — prevents path traversal and abuse
 - Anonymous — no login, no user data stored
 - Portable — runs on Cloudflare Workers, Fly.io, or any Node.js host
@@ -62,7 +62,12 @@ Increments the count and records the visitor. Requires `X-Visitor-Id` header (a 
 
 ### POST /likes/batch
 
-Returns counts for multiple slugs in a single request. Useful for list pages (home, archive, category) where many items are shown at once.
+Returns counts for multiple slugs in a single request. A batch **read** operation — no likes are created, only fetched.
+
+**Use cases:**
+- **Home page** — show like counts for the latest 5 posts, 3 notes, and 5 curated links in one call
+- **Archive/category pages** — load counts for all items in a listing without N individual requests
+- **Sidebar widgets** — "most liked" or "trending" widgets that need counts for multiple slugs
 
 ```bash
 curl -X POST https://simplelikes.workers.dev/likes/batch \
@@ -74,13 +79,15 @@ curl -X POST https://simplelikes.workers.dev/likes/batch \
 {"slugs":{"hello-world":42,"my-post":7,"note-1":0}}
 ```
 
+**Design note:** This endpoint uses `POST` instead of `GET` because it carries a JSON body with the list of slugs. `GET` with a request body has no defined semantics per RFC 9110 §9.3.1 and may be rejected by proxies/CDNs. The `POST`-for-read pattern is the industry standard for batch reads — the same approach used by Elasticsearch (`POST /_search`), GraphQL (`POST /graphql`), and OData (`POST /$batch`). Despite using `POST`, this is a **read operation** for rate limiting purposes.
+
 ### Errors
 
 | Status | Reason |
 |---|---|
 | 400 | Invalid slug or missing `X-Visitor-Id` |
 | 405 | Method not allowed |
-| 429 | Rate limit exceeded |
+| 429 | Rate limit exceeded (includes `Retry-After` header) |
 
 ## Security
 
@@ -89,7 +96,8 @@ simplelikes is designed with defense in depth:
 | Layer | Mechanism |
 |---|---|
 | CORS | Only origins in `ALLOWED_ORIGINS` env var can call from a browser |
-| Rate limit | 10 requests per minute per IP |
+| Per-IP rate limit | 10 requests per minute per IP — primary defense against individual abuse |
+| Global rate limit | 500 GET/min, 50 POST/min — secondary layer protecting D1 free tier quota from coordinated attacks |
 | Slug validation | Regex-restricted: `[a-z0-9/-]`, max 200 chars |
 | Visitor dedup | `likes_visitors` table prevents double-counting per slug + visitor |
 | Security headers | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` |
@@ -210,7 +218,7 @@ simplelikes/
 │   ├── db/schema.sql         D1 schema
 │   └── utils/
 │       ├── cors.ts           CORS whitelist + security headers
-│       ├── rate-limit.ts     Rate limiting per IP
+│       ├── rate-limit.ts     Per-IP + global rate limiting
 │       └── validate.ts       Slug validation
 ├── examples/
 │   └── likes.js              Client-side integration example
