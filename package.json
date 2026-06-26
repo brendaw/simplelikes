@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:integration": "vitest run test/integration.test.ts",
+    "test:integration": "INTEGRATION_TEST_SECRET=\"${INTEGRATION_TEST_SECRET:-$(grep INTEGRATION_TEST_SECRET .env 2>/dev/null | cut -d= -f2)}\" vitest run test/integration.test.ts",
     "setup": "bash scripts/setup.sh",
     "db:migrate": "wrangler d1 execute simplelikes --remote --file=src/db/schema.sql && wrangler d1 execute simplelikes-staging --remote --file=src/db/schema.sql",
     "changelog": "bash scripts/changelog.sh",
