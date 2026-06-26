@@ -85,6 +85,9 @@ echo ""
 echo "→ Creating tag $TAG..."
 git tag "$TAG"
 
+echo "→ Generating CHANGELOG entry..."
+RELEASING=1 ./scripts/changelog.sh
+
 echo ""
 echo "Diff summary:"
 git diff --stat "$LATEST_TAG..HEAD"
@@ -117,14 +120,15 @@ fi
 # --- Commit ---
 echo ""
 echo "→ Committing..."
+git add "$CHANGELOG"
 if (( ${#CLOSE_ISSUES[@]} > 0 )); then
 	closes_body=""
 	for num in "${CLOSE_ISSUES[@]}"; do
 		closes_body="${closes_body}Closes #${num}"$'\n'
 	done
-	git commit --allow-empty -m "chore: release $TAG" -m "$closes_body"
+	git commit -m "chore: release $TAG" -m "$closes_body"
 else
-	git commit --allow-empty -m "chore: release $TAG"
+	git commit -m "chore: release $TAG"
 fi
 
 echo "→ Moving tag $TAG to release commit..."

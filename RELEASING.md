@@ -11,7 +11,8 @@ This document describes the release process for maintainers of simplelikes.
 | `npm run deploy` | Deploy to default environment |
 | `npm run deploy:staging` | Deploy to staging |
 | `npm run deploy:production` | Deploy to production |
-| `scripts/release.sh` | Orchestrates the full release: version detection, changelog, commit, tag, and push |
+| `scripts/release.sh` | Orchestrates the full release: version detection, changelog generation, commit, tag, and push |
+| `scripts/changelog.sh` | Generates CHANGELOG entries from conventional commits; run standalone to refresh [Unreleased] or during release workflow |
 
 ### Lifecycle
 
@@ -38,10 +39,11 @@ The script will:
 
 1. Detect the next version from conventional commits (MAJOR / MINOR / PATCH) or accept an explicit override
 2. Ask for confirmation, then create the tag
-3. Show a diff of the changes for review
-4. Ask for a final confirmation
-5. Optionally, list open issues and prompt which ones to close — adds `Closes #N` to the commit message and closes them via `gh issue close`
-6. Commit, push `main`, and push the tag — triggering the release workflow
+3. Run `scripts/changelog.sh` to generate the versioned CHANGELOG entry
+4. Show a diff of the changes for review
+5. Ask for a final confirmation
+6. Optionally, list open issues and prompt which ones to close — adds `Closes #N` to the commit message and closes them via `gh issue close`
+7. Commit the CHANGELOG, push `main`, and push the tag — triggering the release workflow
 
 The CI will deploy to production and create a GitHub Release with changelog notes attached.
 
@@ -63,6 +65,24 @@ If you need to run the steps individually:
    ```
 
 The key constraint: `main` must be pushed before the tag, so the workflow checks out the correct state.
+
+## Keeping [Unreleased] up to date
+
+Run `scripts/changelog.sh` at any point to refresh the `[Unreleased]` section with conventional commits since the last tag:
+
+```bash
+./scripts/changelog.sh
+```
+
+The script categorizes commits as:
+
+| Prefix | CHANGELOG section |
+|---|---|
+| `feat:` | Added |
+| `fix:` | Fixed |
+| `docs:`, `chore:`, `ci:`, `refactor:`, `style:`, `perf:`, `test:` | Changed |
+
+Commits without a conventional prefix are ignored.
 
 ## Fixing a failed release
 
@@ -92,6 +112,17 @@ git push --force origin v0.1.0
 ```
 
 Pushing the tag again re-triggers the release workflow automatically.
+
+## Recreating or backfilling a release for an existing tag
+
+If a GitHub Release needs to be (re)generated for an older tag, trigger the workflow manually:
+
+1. Go to **Actions → Release → Run workflow**
+2. Keep the branch set to **`main`**
+3. Enter the tag in the **"Tag to release"** field (e.g. `v0.1.0`)
+4. Click **Run workflow**
+
+The workflow checks out `main` for the workflow files, then checks out the specified tag for the source — parsing its CHANGELOG entry and creating or updating the GitHub Release accordingly.
 
 ## When not to create a release
 
