@@ -136,7 +136,7 @@ This auto-detects your D1 databases, creates `.env` with real IDs, copies `wrang
 
 ### Other platforms
 
-simplelikes can be adapted to any JavaScript runtime that supports SQLite or HTTP request handling. See issues [#8](https://github.com/brendaw/simplelikes/issues/8) (Fly.io) and [#9](https://github.com/brendaw/simplelikes/issues/9) (Supabase) for planned deployment adapters.
+simplelikes can be adapted to any JavaScript runtime that supports SQLite or HTTP request handling.
 
 ## Configuration
 
