@@ -62,6 +62,23 @@ Não há um processo formal no momento. Contribuidores frequentes e de confianç
 
 Direcionamento técnico do projeto é definido pelo maintainer principal. Decisões significativas (mudanças de runtime, alterações de esquema, novos endpoints) são discutidas em issues antes da implementação.
 
+## Testes de integração
+
+Os testes de integração em `test/integration.test.ts` batem contra o ambiente staging real (`simplelikes-staging.william-brendaw.workers.dev`).
+
+**Pré-requisitos:**
+
+- `INTEGRATION_TEST_SECRET` configurado no `.env` (mesmo valor do GitHub Secret)
+- Staging deployada com a versão mais recente do código (o guarda `X-Integration-Test` é necessário para bypass do rate limit)
+
+**Executar localmente:**
+
+```bash
+INTEGRATION_TEST_SECRET=$(grep INTEGRATION_TEST_SECRET .env | cut -d= -f2) npm run test:integration
+```
+
+Os testes são pulados automaticamente se `INTEGRATION_TEST_SECRET` não estiver definida, evitando que forks ou contribuidores acidentalmente batam na staging.
+
 ---
 
 *Este documento é vivo e será atualizado conforme o projeto evolui.*
