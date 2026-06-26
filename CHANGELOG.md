@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.5](https://github.com/brendaw/simplelikes/releases/tag/v0.1.5) - 2026-06-26
+
+### Fixed
+
+- Remove process.env dependency for Workers runtime compatibility
+
+### Changed
+
+- Add .env-based config, dev:stop, setup and db:migrate scripts
+- Add .env-based config, dev:stop, setup and db:migrate scripts
+- Add dev:stop, setup and db:migrate scripts; fix CORS and local-first dev
+- Add setup, db:migrate scripts and fix typecheck
+
 ## [0.1.4](https://github.com/brendaw/simplelikes/releases/tag/v0.1.4) - 2026-06-26
 
 ### Fixed
