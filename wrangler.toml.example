@@ -14,6 +14,8 @@ name = "simplelikes-staging"
 binding = "DB"
 database_name = "simplelikes-staging"
 database_id = "__STAGING_DATABASE_ID__"
+[env.staging.vars]
+INTEGRATION_TEST_SECRET = "__INTEGRATION_TEST_SECRET__"
 
 [env.production]
 name = "simplelikes"
