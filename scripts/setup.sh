@@ -2,6 +2,7 @@
 set -euo pipefail
 
 WRANGLER_TOML="wrangler.toml"
+ENV_FILE=".env"
 UUID_PATTERN='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 
 if [ -f "$WRANGLER_TOML" ]; then
@@ -33,35 +34,21 @@ fi
 echo "✅ Production DB: $PROD_DB_ID"
 echo "✅ Staging DB:    $STAGING_DB_ID"
 
-echo "📝 Generating $WRANGLER_TOML..."
-cat > "$WRANGLER_TOML" << EOF
-name = "simplelikes"
-main = "src/index.ts"
-compatibility_date = "2025-01-01"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "simplelikes"
-database_id = "$PROD_DB_ID"
-
-[env.staging]
-name = "simplelikes-staging"
-[[env.staging.d1_databases]]
-binding = "DB"
-database_name = "simplelikes-staging"
-database_id = "$STAGING_DB_ID"
-
-[env.production]
-name = "simplelikes"
-[[env.production.d1_databases]]
-binding = "DB"
-database_name = "simplelikes"
-database_id = "$PROD_DB_ID"
-EOF
-
+echo "📝 Copying $WRANGLER_TOML from example..."
+cp wrangler.toml.example "$WRANGLER_TOML"
 echo "✅ $WRANGLER_TOML created."
+
+echo "📝 Generating $ENV_FILE..."
+cat > "$ENV_FILE" << EOF
+D1_DATABASE_ID=$PROD_DB_ID
+ALLOWED_ORIGINS=https://williambrendaw.com
+EOF
+echo "✅ $ENV_FILE created."
 
 echo "🗄️  Applying database schema..."
 npm run db:migrate
 
-echo "✅ Setup complete! Run 'npm run dev' to start."
+echo ""
+echo "✅ Setup complete!"
+echo "   Run 'npm run dev' to start the development server."
+echo "   Run 'npm run deploy -- --env staging' for staging deploy."

@@ -1,31 +1,22 @@
-# Wrangler configuration — copy to wrangler.toml and fill in your IDs
 name = "simplelikes"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
-# Default section — used by `npm run dev` (local SQLite, no Cloudflare needed)
 [[d1_databases]]
 binding = "DB"
 database_name = "simplelikes"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "{env.D1_DATABASE_ID}"
 
-# Environment: staging (deployed on push to main)
 [env.staging]
 name = "simplelikes-staging"
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "simplelikes-staging"
-database_id = "{env.D1_STAGING_DATABASE_ID}"
+database_id = "{env.D1_DATABASE_ID}"
 
-# Environment: production (deployed on tag)
 [env.production]
 name = "simplelikes"
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "simplelikes"
-database_id = "{env.D1_PRODUCTION_DATABASE_ID}"
-
-# To create the D1 databases:
-#   npx wrangler d1 create simplelikes
-#   npx wrangler d1 create simplelikes-staging
-# Then copy the database_ids from the output.
+database_id = "{env.D1_DATABASE_ID}"
