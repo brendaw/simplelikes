@@ -27,10 +27,11 @@ A minimal, standalone likes counter API. Drop-in anonymous likes for any static 
 
 ```bash
 npm install
+cp .env.example .env
 npm run dev
 ```
 
-The dev server starts at `http://localhost:8787`.
+The dev server starts at `http://localhost:8787`. No Cloudflare account needed — a local SQLite database is created automatically.
 
 ```bash
 curl http://localhost:8787/likes/hello-world
@@ -97,7 +98,15 @@ simplelikes is designed with defense in depth:
 
 ### Cloudflare Workers + D1 (recommended)
 
-#### Prerequisites
+#### One-command setup
+
+```bash
+npm run setup
+```
+
+This auto-detects your D1 databases, creates `.env` with real IDs, copies `wrangler.toml.example`, and applies the schema.
+
+#### Manual setup
 
 1. Install Wrangler CLI:
    ```bash
@@ -109,27 +118,18 @@ simplelikes is designed with defense in depth:
    wrangler login
    ```
 
-   This opens your browser to authorize Wrangler. The token is saved locally.
-
-#### Setup
-
-1. Create the D1 databases:
+3. Create the D1 databases:
    ```bash
    wrangler d1 create simplelikes
    wrangler d1 create simplelikes-staging
    ```
 
-   Note the `database_id` output for each — you'll need it in the next step.
-
-2. Copy `wrangler.toml.example` to `wrangler.toml` (gitignored) and fill in the database IDs.
-
-3. Apply the schema:
+4. Run setup:
    ```bash
-   wrangler d1 execute simplelikes --file=src/db/schema.sql --remote
-   wrangler d1 execute simplelikes-staging --file=src/db/schema.sql --remote
+   npm run setup
    ```
 
-4. Deploy:
+5. Deploy:
    ```bash
    npm run deploy
    ```
@@ -149,13 +149,16 @@ simplelikes can be adapted to any JavaScript runtime that supports SQLite or HTT
 
 ### Local configuration
 
-`wrangler.toml` is gitignored. Copy the template and fill in your IDs:
+Both `wrangler.toml` and `.env` are gitignored. Start from the examples:
 
 ```bash
+cp .env.example .env
 cp wrangler.toml.example wrangler.toml
 ```
 
-The template includes placeholders for `database_id` in all three environments (default, staging, production).
+The `wrangler.toml` uses `{env.VAR}` placeholders resolved at runtime by Wrangler. For local dev, the `.env` file provides these values — no Cloudflare account required.
+
+For Cloudflare deployment, use `npm run setup` to auto-detect databases and generate both files.
 
 ## Client-side usage
 
@@ -181,8 +184,11 @@ The script automatically:
 ## Scripts
 
 | Script | Purpose |
-|---|---|
-| `npm run dev` | Start local dev server |
+|---|---|---|
+| `npm run dev` | Start local dev server (loads `.env` automatically) |
+| `npm run dev:stop` | Stop local dev server |
+| `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |
+| `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |
 | `npm test` | Run tests |
 | `npm run changelog` | Refresh CHANGELOG [Unreleased] section |
@@ -217,8 +223,10 @@ simplelikes/
 │       └── release.yml       GitHub Release on tag + manual dispatch
 ├── scripts/
 │   ├── release.sh            Automated release flow
-│   └── changelog.sh          CHANGELOG generation from conventional commits
-├── wrangler.toml.example     Template — copy to wrangler.toml (gitignored)
+│   ├── changelog.sh          CHANGELOG generation from conventional commits
+│   └── setup.sh              One-command setup script
+├── .env.example              Env vars template — copy to .env (gitignored)
+├── wrangler.toml.example     Wrangler config template — copy to wrangler.toml (gitignored)
 ├── MAINTAINERS.md            Maintenance policies
 ├── CONTRIBUTING.md           Contribution guide
 ├── RELEASING.md              Release process

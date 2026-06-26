@@ -35,6 +35,7 @@ Atualmente sou o único maintainer do projeto. Todo o fluxo de contribuição pa
 
 - Releases são publicados automaticamente ao push de uma tag `v*`
 - O script `scripts/release.sh` orquestra o processo: detecta versão, gera CHANGELOG, cria tag e push
+- O script `scripts/setup.sh` automatiza o setup local: detecta D1 databases, gera `.env`, aplica schema
 - Mudanças que não afetam `src/` (docs, CI, scripts) não geram release
 - Ver `RELEASING.md` para o fluxo completo
 

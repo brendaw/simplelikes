@@ -5,8 +5,11 @@ This document describes the release process for maintainers of simplelikes.
 ## Scripts overview
 
 | Script | Purpose |
-|---|---|
-| `npm run dev` | Start local dev server for development testing |
+|---|---|---|
+| `npm run dev` | Start local dev server (loads `.env` automatically) |
+| `npm run dev:stop` | Stop local dev server |
+| `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |
+| `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |
 | `npm test` | Run test suite |
 | `npm run deploy` | Deploy to default environment |
@@ -14,6 +17,7 @@ This document describes the release process for maintainers of simplelikes.
 | `npm run deploy:production` | Deploy to production |
 | `scripts/release.sh` | Orchestrates the full release: version detection, changelog generation, commit, tag, and push |
 | `scripts/changelog.sh` | Generates CHANGELOG entries from conventional commits; run standalone to refresh [Unreleased] or during release workflow |
+| `scripts/setup.sh` | One-command setup: detects D1 databases, generates `.env`, copies config, applies schema |
 
 ## CI/CD pipeline
 

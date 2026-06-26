@@ -8,9 +8,8 @@ For bug reports or feature requests, [open an Issue](https://github.com/brendaw/
 
 - Node.js 22+
 - npm
-- A Cloudflare account (for deployment; not required for local development)
-- Wrangler CLI (install globally: `npm install -g wrangler`)
-- Cloudflare login (`wrangler login`) for database and deployment operations
+- No Cloudflare account needed for local development — a local SQLite database is used
+- Wrangler CLI (`npm install -g wrangler`) and `wrangler login` only needed for deployment
 
 ## How to contribute
 
@@ -21,13 +20,14 @@ For bug reports or feature requests, [open an Issue](https://github.com/brendaw/
    cd simplelikes
    ```
 
-2. Install dependencies:
+2. Install dependencies and initialize config:
 
    ```bash
    npm install
+   cp .env.example .env
    ```
 
-3. Start the local dev server:
+3. Start the local dev server (loads `.env` automatically):
 
    ```bash
    npm run dev
@@ -85,14 +85,17 @@ The repository includes an `.editorconfig` file. Most editors support it nativel
 ## Scripts
 
 | Script | Purpose |
-|---|---|
-| `npm run dev` | Start local dev server with Wrangler |
+|---|---|---|
+| `npm run dev` | Start local dev server (loads `.env` automatically) |
+| `npm run dev:stop` | Stop local dev server |
+| `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |
+| `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |
 | `npm test` | Run test suite (Vitest) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run deploy` | Deploy to Cloudflare Workers |
 
-`scripts/release.sh` and `scripts/changelog.sh` are maintainer-only and are not part of the contributor workflow.
+`scripts/release.sh`, `scripts/changelog.sh`, and `scripts/setup.sh` are maintainer-only scripts. The setup is also available via `npm run setup` for contributors with Cloudflare access.
 
 ## CI checks
 
