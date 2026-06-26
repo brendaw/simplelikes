@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.1](https://github.com/brendaw/simplelikes/releases/tag/v0.2.1) - 2026-06-26
+
+### Changed
+
+- Default ALLOWED_ORIGINS to localhost:8787
+- Remove Fly.io and Supabase references from README
+- Remove hardcoded CORS default origin
+- Update scripts, project structure, and coverage info
+
 ## [0.2.0](https://github.com/brendaw/simplelikes/releases/tag/v0.2.0) - 2026-06-26
 
 ### Added
