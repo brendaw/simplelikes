@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0](https://github.com/brendaw/simplelikes/releases/tag/v0.3.0) - 2026-06-26
+
+### Added
+
+- Add global rate limit safeguard for D1 quota
+
+### Changed
+
+- Document batch design rationale and API principles
+- Add global rate limit unit and handler tests
+
 ## [0.2.1](https://github.com/brendaw/simplelikes/releases/tag/v0.2.1) - 2026-06-26
 
 ### Changed
