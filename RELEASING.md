@@ -39,7 +39,9 @@ The script will:
 1. Detect the next version from conventional commits (MAJOR / MINOR / PATCH) or accept an explicit override
 2. Ask for confirmation, then create the tag
 3. Show a diff of the changes for review
-4. Ask for a final confirmation, then commit, push `main`, and push the tag — triggering the release workflow
+4. Ask for a final confirmation
+5. Optionally, list open issues and prompt which ones to close — adds `Closes #N` to the commit message and closes them via `gh issue close`
+6. Commit, push `main`, and push the tag — triggering the release workflow
 
 The CI will deploy to production and create a GitHub Release with changelog notes attached.
 
