@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.6](https://github.com/brendaw/simplelikes/releases/tag/v0.1.6) - 2026-06-26
+
+### Fixed
+
+- Correct wrangler.toml substitution for deploy and deploy staging
+
 ## [0.1.5](https://github.com/brendaw/simplelikes/releases/tag/v0.1.5) - 2026-06-26
 
 ### Fixed
