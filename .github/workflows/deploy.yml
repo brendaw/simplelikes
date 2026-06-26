@@ -41,13 +41,16 @@ jobs:
       - run: npm ci
 
       - name: Generate wrangler.toml from example
-        run: cp wrangler.toml.example wrangler.toml
+        run: |
+          cp wrangler.toml.example wrangler.toml
+          sed -i "s/{env.D1_STAGING_DATABASE_ID}/$D1_STAGING_DATABASE_ID/g" wrangler.toml
+        env:
+          D1_STAGING_DATABASE_ID: ${{ secrets.D1_STAGING_DATABASE_ID }}
 
       - name: Deploy to staging
         run: npm run deploy:staging
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          D1_STAGING_DATABASE_ID: ${{ secrets.D1_STAGING_DATABASE_ID }}
 
   deploy-production:
     needs: validate
@@ -67,10 +70,13 @@ jobs:
       - run: npm ci
 
       - name: Generate wrangler.toml from example
-        run: cp wrangler.toml.example wrangler.toml
+        run: |
+          cp wrangler.toml.example wrangler.toml
+          sed -i "s/{env.D1_PRODUCTION_DATABASE_ID}/$D1_PRODUCTION_DATABASE_ID/g" wrangler.toml
+        env:
+          D1_PRODUCTION_DATABASE_ID: ${{ secrets.D1_PRODUCTION_DATABASE_ID }}
 
       - name: Deploy to production
         run: npm run deploy:production
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          D1_PRODUCTION_DATABASE_ID: ${{ secrets.D1_PRODUCTION_DATABASE_ID }}
