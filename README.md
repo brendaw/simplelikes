@@ -301,8 +301,8 @@ simplelikes/
 │   ├── ISSUE_TEMPLATE/       Bug report + feature request templates
 │   ├── pull_request_template.md
 │   └── workflows/
-│       ├── build.yml         Typecheck + unit tests (workflow_call + workflow_dispatch)
-│       ├── deploy.yml        Build → Deploy → Integration tests → (if production) Release
+│       ├── build.yml         Push main/tag → Typecheck + tests → Trigger Deploy
+│       ├── deploy.yml        Deploy → Integration tests → (if tag) Release
 │       └── release.yml       GitHub Release (workflow_dispatch only)
 ├── scripts/
 │   ├── release.sh            Automated release flow

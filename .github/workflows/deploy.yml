@@ -1,9 +1,6 @@
 name: Deploy
 
 on:
-  push:
-    branches: [main]
-    tags: ["v*"]
   workflow_dispatch:
     inputs:
       environment:
@@ -20,14 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    uses: ./.github/workflows/build.yml
-
   deploy-staging:
-    needs: build
-    if: >
-      (github.event_name == 'push' && github.ref_type == 'branch') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    if: github.event.inputs.environment == 'staging'
     runs-on: ubuntu-24.04
     environment: staging
     steps:
@@ -57,10 +48,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
   deploy-production:
-    needs: build
-    if: >
-      (github.event_name == 'push' && github.ref_type == 'tag') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    if: github.event.inputs.environment == 'production'
     runs-on: ubuntu-24.04
     environment: production
     steps:

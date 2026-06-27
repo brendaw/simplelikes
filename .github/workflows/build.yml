@@ -1,7 +1,9 @@
 name: Build
 
 on:
-  workflow_call:
+  push:
+    branches: [main]
+    tags: ["v*"]
   workflow_dispatch:
     inputs:
       skip-typecheck:
@@ -9,6 +11,10 @@ on:
         required: false
         type: boolean
         default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   typecheck:
@@ -43,3 +49,27 @@ jobs:
 
       - name: Run tests with coverage
         run: npm run test:coverage
+
+  trigger-deploy:
+    needs: unit-tests
+    if: github.event_name == 'push' && success()
+    permissions:
+      actions: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "environment=production" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger Deploy
+        run: |
+          gh workflow run deploy.yml \
+            -f environment=${{ steps.env.outputs.environment }} \
+            --ref ${{ github.ref_name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

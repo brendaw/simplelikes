@@ -44,7 +44,7 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
 ```
                         ┌────────────────────────────────────────────┐
                         │                   Build                    │
-                        │  workflow_call / workflow_dispatch         │
+                        │   push: main / push: tag / w.dispatch     │
                         │                                            │
                         │  ┌──────────┐     ┌─────────────┐         │
                         │  │Typecheck │ ──► │ Unit tests  │         │
@@ -53,6 +53,7 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
                         │  └──────────┘     └─────────────┘         │
                         └────────────────────┬───────────────────────┘
                                              │
+                                       gh workflow run
                     ┌────────────────────────┼────────────────────────┐
                     ▼                        ▼                        │
 ┌──────────────────────────────────┐  ┌──────────────────────────────────┐
@@ -70,33 +71,33 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
 │    │        done          │      │  │  │  Trigger Release     │       │
 │    └──────────────────────┘      │  │  └──────────┬───────────┘       │
 └──────────────────────────────────┘  └─────────────┼────────────────────┘
-                                                     │
-                                                     ▼
-                                          ┌──────────────────────┐
-                                          │      Release         │
-                                          │  workflow_dispatch   │
-                                          │                      │
-                                          │  ┌────────────────┐  │
-                                          │  │  GitHub Release │  │
-                                          │  │  (CHANGELOG)    │  │
-                                          │  └────────────────┘  │
-                                          └──────────────────────┘
+                                                      │
+                                                      ▼
+                                           ┌──────────────────────┐
+                                           │      Release         │
+                                           │  workflow_dispatch   │
+                                           │                      │
+                                           │  ┌────────────────┐  │
+                                           │  │  GitHub Release │  │
+                                           │  │  (CHANGELOG)    │  │
+                                           │  └────────────────┘  │
+                                           └──────────────────────┘
 ```
 
 ### Build
 
-- **Trigger automático:** chamado pelo Deploy (`workflow_call`)
+- **Trigger automático:** push para `main` (staging) ou tag `v*` (produção) — primeiro workflow do pipeline
 - **Trigger manual:** `workflow_dispatch` com input `skip-typecheck` opcional
-- **Estágios:** Typecheck → Unit tests com coverage (threshold 95%)
-- **Uso:** validar rapidamente um branch sem precisar deployar
+- **Estágios:** Typecheck → Unit tests com coverage (threshold 95%) → (se push) Trigger Deploy via `gh workflow run`
+- **Uso:** pipeline de entrada — valida o código e dispara o Deploy automaticamente; `workflow_dispatch` permite validar branches sem deploy
 
 ### Deploy
 
-- **Trigger automático:** push para `main` (staging) ou tag `v*` (produção)
+- **Trigger automático:** chamado pelo Build (`gh workflow run deploy.yml -f environment=... --ref ...`)
 - **Trigger manual:** `workflow_dispatch` com input `environment` (staging/production)
-- **Estágios:** Build → Deploy → Integration tests → (se produção) Trigger Release
-- **Integration tests:** rodam automaticamente contra a URL do ambiente deployado, usando `INTEGRATION_TEST_SECRET` para bypass do rate limit e `ALLOWED_ORIGINS` via `EXPECTED_ORIGIN` para validação CORS
-- **Release trigger:** only em produção com tag — checa `integration-tests.result == 'success'` (não `success()`, que falharia com o `deploy-staging` skipped em push de tag) — `gh workflow run release.yml` com `GITHUB_TOKEN`
+- **Estágios:** Deploy → Integration tests → (se produção + tag) Trigger Release
+- **Integration tests:** rodam automaticamente contra a URL do ambiente deployado, usando `INTEGRATION_TEST_SECRET` para bypass do rate limit e `EXPECTED_ORIGIN` via `ALLOWED_ORIGINS` para validação CORS
+- **Release trigger:** apenas em produção com tag — checa `integration-tests.result == 'success'` + `github.ref_type == 'tag'` — `gh workflow run release.yml` com `GITHUB_TOKEN`
 
 ### Release
 

@@ -187,8 +187,8 @@ Before adding a new endpoint, ask:
 
 | Workflow | Trigger | Stages |
 |---|---|---|
-| **Build** | Called by Deploy, `workflow_dispatch` | Typecheck → Unit tests with coverage (threshold 95%) |
-| **Deploy** | Push to `main`, push to tag, `workflow_dispatch` | Build → Deploy (staging/production) → Integration tests → (if production) Trigger Release |
+| **Build** | Push to `main`, push to tag, `workflow_dispatch` | Typecheck → Unit tests with coverage (threshold 95%) → (if push) Trigger Deploy |
+| **Deploy** | `workflow_dispatch` only (called by Build or manually) | Deploy (staging/production) → Integration tests → (if production tag) Trigger Release |
 | **Release** | `workflow_dispatch` only | Create GitHub Release from CHANGELOG |
 
 The pipeline chain flows automatically:
