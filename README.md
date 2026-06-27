@@ -70,7 +70,7 @@ Returns counts for multiple slugs in a single request. A batch **read** operatio
 - **Sidebar widgets** — "most liked" or "trending" widgets that need counts for multiple slugs
 
 ```bash
-curl -X POST https://simplelikes.workers.dev/likes/batch \
+curl -X POST https://simplelikes.william-brendaw.workers.dev/likes/batch \
   -H "Content-Type: application/json" \
   -d '{"slugs":["hello-world","my-post","note-1"]}'
 ```
@@ -170,6 +170,12 @@ The server starts at `http://localhost:3000` with an auto-created SQLite databas
 
 > `better-sqlite3` is an **optional dependency** — Cloudflare Workers deploys do not install it. Only install when self-hosting.
 
+Unlike `npm run dev` (which loads `.env` automatically via Wrangler), `npm run serve` reads environment variables directly from the process. Set them in your shell or process manager:
+
+```bash
+PORT=3000 DB_PATH=./data/likes.db ALLOWED_ORIGINS=https://example.com npm run serve
+```
+
 #### Configuration
 
 | Env var | Default | Description |
@@ -177,6 +183,8 @@ The server starts at `http://localhost:3000` with an auto-created SQLite databas
 | `PORT` | `3000` | HTTP server port |
 | `DB_PATH` | `./data/likes.db` | SQLite database file path |
 | `ALLOWED_ORIGINS` | — | Comma-separated list of allowed CORS origins |
+
+These can also be added to `.env` for local testing (see [`.env.example`](.env.example)).
 
 #### Process management
 
@@ -186,6 +194,8 @@ For production VPS deployments, use a process manager like `pm2`:
 npm install -g pm2
 pm2 start npm --name simplelikes -- run serve
 ```
+
+Set environment variables in the process manager config (`ecosystem.config.js` for pm2) or via your systemd service file.
 
 ## Configuration
 
@@ -222,7 +232,7 @@ See [`examples/likes.js`](examples/likes.js) for a ready-to-use client script.
 
 <script src="likes.js"></script>
 <script>
-  new LikesClient({ apiUrl: "https://simplelikes.workers.dev" });
+  new LikesClient({ apiUrl: "https://simplelikes.william-brendaw.workers.dev" });
 </script>
 ```
 
@@ -274,11 +284,12 @@ simplelikes/
 ├── vitest.config.ts          Vitest config (coverage, thresholds)
 ├── test/
 │   ├── cache.test.ts             Unit: Cache API wrap + batchKey
-│   ├── likes.test.ts             Unit: validate utils
-│   ├── rate-limit.test.ts        Unit: rate limit logic
 │   ├── cors.test.ts              Unit: CORS whitelist + security headers
 │   ├── handler.test.ts           Unit: full request routing with mocked D1
-│   └── integration.test.ts       Integration against staging
+│   ├── integration.test.ts       Integration against staging
+│   ├── likes.test.ts             Unit: validate utils
+│   ├── rate-limit.test.ts        Unit: rate limit logic
+│   └── storage.test.ts           Unit: D1Storage + Sqlite3Storage
 ├── .github/
 │   ├── CODEOWNERS            Required reviewer (@brendaw)
 │   ├── FUNDING.yml           Support links

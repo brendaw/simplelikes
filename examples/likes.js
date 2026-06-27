@@ -12,7 +12,7 @@
  *   2. Include this script and instantiate:
  *      <script src="likes.js"></script>
  *      <script>
- *        new LikesClient({ apiUrl: "https://simplelikes.workers.dev" });
+ *        new LikesClient({ apiUrl: "https://simplelikes.william-brendaw.workers.dev" });
  *      </script>
  *
  * The script:
@@ -24,7 +24,7 @@
 
 class LikesClient {
   constructor(options = {}) {
-    this.apiUrl = options.apiUrl || "https://simplelikes.workers.dev";
+    this.apiUrl = options.apiUrl || "https://simplelikes.william-brendaw.workers.dev";
     this.selector = options.selector || "[data-slug]";
     this.visitorId = this._generateVisitorId();
     this._init();
