@@ -62,7 +62,7 @@ export async function handleRequest(
 
   switch (request.method) {
     case "GET":
-      return handleGet(request, storage, slug, c, cache);
+      return c.wrap(await handleGet(request, storage, slug, cache), request);
     case "POST":
       return handlePost(request, storage, slug, c);
     default:
@@ -95,12 +95,11 @@ async function handleGet(
   request: Request,
   storage: IStorage,
   slug: string,
-  c: ReturnType<typeof cors.create>,
   cache: ReturnType<typeof createCache>,
 ): Promise<Response> {
   return cache.wrap(request, 60, async () => {
     const count = await storage.getCount(slug);
-    return c.wrap(Response.json({ slug, count }), request);
+    return Response.json({ slug, count });
   });
 }
 
@@ -180,8 +179,11 @@ async function handleBatch(
 
   const key = await cache.batchKey(slugs);
 
-  return cache.wrap(request, 30, async () => {
-    const result = await storage.batchGet(slugs);
-    return c.wrap(Response.json({ slugs: result }), request);
-  }, key);
+  return c.wrap(
+    await cache.wrap(request, 30, async () => {
+      const result = await storage.batchGet(slugs);
+      return Response.json({ slugs: result });
+    }, key),
+    request,
+  );
 }
