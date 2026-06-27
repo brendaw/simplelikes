@@ -113,8 +113,8 @@ describe("cache", () => {
       const key2 = await cache.batchKey(["a", "m", "z"]);
 
       expect(key1).toBe(key2);
-      expect(key1.startsWith("batch:")).toBe(true);
-      expect(key1.length).toBe(70);
+      expect(key1.startsWith("/__cache/")).toBe(true);
+      expect(key1.length).toBe(73);
     });
 
     it("generates different keys for different slug sets", async () => {

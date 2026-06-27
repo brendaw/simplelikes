@@ -11,7 +11,7 @@ export function createCache(ctx?: ExecutionContext) {
     ): Promise<Response> {
       if (!cache) return fetchFn();
 
-      const url = customKey ?? request.url;
+      const url = customKey ? new URL(customKey, request.url).toString() : request.url;
       const cached = await cache.match(new Request(url));
       if (cached) return cached;
 
@@ -39,7 +39,7 @@ export function createCache(ctx?: ExecutionContext) {
     async batchKey(slugs: string[]): Promise<string> {
       const sorted = [...slugs].sort();
       const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(sorted.join("\0")));
-      return "batch:" + Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
+      return "/__cache/" + Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
     },
   };
 }
