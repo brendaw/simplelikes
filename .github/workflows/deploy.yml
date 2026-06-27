@@ -119,6 +119,7 @@ jobs:
         env:
           INTEGRATION_TEST_SECRET: ${{ secrets.INTEGRATION_TEST_SECRET }}
           INTEGRATION_TEST_URL: ${{ steps.env.outputs.url }}
+          EXPECTED_ORIGIN: ${{ secrets.ALLOWED_ORIGINS }}
 
   trigger-release:
     needs: integration-tests
