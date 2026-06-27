@@ -32,13 +32,18 @@ function create(allowedOrigins?: string) {
 
   function wrap(response: Response, request: Request): Response {
     const origin = getOrigin(request);
+    const headers = new Headers(response.headers);
     if (origin) {
-      response.headers.set("Access-Control-Allow-Origin", origin);
-      response.headers.set("Vary", "Origin");
+      headers.set("Access-Control-Allow-Origin", origin);
+      headers.set("Vary", "Origin");
     }
-    response.headers.set("X-Content-Type-Options", "nosniff");
-    response.headers.set("X-Frame-Options", "DENY");
-    return response;
+    headers.set("X-Content-Type-Options", "nosniff");
+    headers.set("X-Frame-Options", "DENY");
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
   }
 
   return { handlePreflight, wrap };
