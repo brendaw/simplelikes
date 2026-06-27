@@ -2,8 +2,9 @@
   <img src="https://badgen.net/github/license/brendaw/simplelikes">
   <img src="https://badgen.net/badge/status/active/green">
   <img src="https://img.shields.io/badge/Cloudflare-Workers%20%2B%20D1-F38020?logo=cloudflare&logoColor=white">
-  <a href="https://github.com/brendaw/simplelikes/actions/workflows/build.yml"><img alt="Build" src="https://github.com/brendaw/simplelikes/actions/workflows/build.yml/badge.svg"></a>
-  <a href="https://github.com/brendaw/simplelikes/actions/workflows/deploy.yml"><img alt="Deploy" src="https://github.com/brendaw/simplelikes/actions/workflows/deploy.yml/badge.svg"></a>
+  <a href="https://github.com/brendaw/simplelikes/actions/workflows/build.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/brendaw/simplelikes/build.yml?branch=main&label=Build"></a>
+  <a href="https://github.com/brendaw/simplelikes/actions/workflows/deploy.yml"><img alt="Staging" src="https://img.shields.io/github/actions/workflow/status/brendaw/simplelikes/deploy.yml?branch=main&label=Staging"></a>
+  <a href="https://github.com/brendaw/simplelikes/actions/workflows/deploy.yml"><img alt="Production" src="https://img.shields.io/github/actions/workflow/status/brendaw/simplelikes/deploy.yml?label=Production"></a>
   <a href="https://github.com/brendaw/simplelikes/issues"><img alt="Issues" src="https://badgen.net/github/open-issues/brendaw/simplelikes"></a>
 </p>
 
