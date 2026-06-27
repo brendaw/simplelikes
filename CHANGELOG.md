@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0](https://github.com/brendaw/simplelikes/releases/tag/v0.4.0) - 2026-06-26
+
+### Added
+
+- Cache POST /likes/batch with 30s TTL using SHA-256 body hash
+- Add ctx parameter and cache GET /likes/:slug with 60s TTL
+- Add generic cache utility using Cloudflare Cache API
+
+### Changed
+
+- Add cache unit tests and mock caches global for 100% coverage
+
 ## [0.3.0](https://github.com/brendaw/simplelikes/releases/tag/v0.3.0) - 2026-06-26
 
 ### Added
