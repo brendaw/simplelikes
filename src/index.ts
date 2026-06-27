@@ -11,8 +11,77 @@ interface Env {
   INTEGRATION_TEST_SECRET?: string;
 }
 
-function checkIntegrationTest(request: Request, env: Env): { reject?: Response; isTest: boolean } {
-  const secret = env.INTEGRATION_TEST_SECRET;
+interface HandlerOptions {
+  allowedOrigins?: string;
+  integrationTestSecret?: string;
+  ctx?: ExecutionContext;
+}
+
+export async function handleRequest(
+  request: Request,
+  storage: IStorage,
+  options: HandlerOptions = {},
+): Promise<Response> {
+  const cache = createCache(options.ctx);
+  const c = cors.create(options.allowedOrigins);
+
+  if (request.method === "OPTIONS") {
+    return c.handlePreflight(request);
+  }
+
+  const url = new URL(request.url);
+
+  // Route: POST /likes/batch
+  if (request.method === "POST" && url.pathname === "/likes/batch") {
+    return handleBatch(request, storage, options.integrationTestSecret, c, cache);
+  }
+
+  const { reject, isTest } = checkIntegrationTest(request, options.integrationTestSecret);
+  if (reject) return c.wrap(reject, request);
+
+  // Route: GET|POST /likes/:slug
+  const slug = url.pathname.replace("/likes/", "");
+
+  const slugError = validateSlug(slug);
+  if (slugError) {
+    return c.wrap(new Response(slugError, { status: 400 }), request);
+  }
+
+  if (!isTest && (request.method === "GET" || request.method === "POST")) {
+    if (!rateLimit.checkGlobal(request.method)) {
+      const retryAfter = rateLimit.retryAfter(request.method);
+      const res = new Response("Global rate limit exceeded", { status: 429, headers: { "Retry-After": String(retryAfter) } });
+      return c.wrap(res, request);
+    }
+  }
+
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  if (!rateLimit.check(ip) && !isTest) {
+    return c.wrap(new Response("Rate limit exceeded", { status: 429 }), request);
+  }
+
+  switch (request.method) {
+    case "GET":
+      return handleGet(request, storage, slug, c, cache);
+    case "POST":
+      return handlePost(request, storage, slug, c);
+    default:
+      return c.wrap(new Response("Method not allowed", { status: 405 }), request);
+  }
+}
+
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const storage = new D1Storage(env.DB);
+    return handleRequest(request, storage, {
+      allowedOrigins: env.ALLOWED_ORIGINS,
+      integrationTestSecret: env.INTEGRATION_TEST_SECRET,
+      ctx,
+    });
+  },
+};
+
+function checkIntegrationTest(request: Request, secret?: string): { reject?: Response; isTest: boolean } {
   if (!secret) return { isTest: false };
 
   const header = request.headers.get("X-Integration-Test");
@@ -21,58 +90,6 @@ function checkIntegrationTest(request: Request, env: Env): { reject?: Response; 
 
   return { isTest: false };
 }
-
-export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const storage = new D1Storage(env.DB);
-    const cache = createCache(ctx);
-    const c = cors.create(env.ALLOWED_ORIGINS);
-
-    if (request.method === "OPTIONS") {
-      return c.handlePreflight(request);
-    }
-
-    const url = new URL(request.url);
-
-    // Route: POST /likes/batch
-    if (request.method === "POST" && url.pathname === "/likes/batch") {
-      return handleBatch(request, storage, env, c, cache);
-    }
-
-    const { reject, isTest } = checkIntegrationTest(request, env);
-    if (reject) return c.wrap(reject, request);
-
-    // Route: GET|POST /likes/:slug
-    const slug = url.pathname.replace("/likes/", "");
-
-    const slugError = validateSlug(slug);
-    if (slugError) {
-      return c.wrap(new Response(slugError, { status: 400 }), request);
-    }
-
-    if (!isTest && (request.method === "GET" || request.method === "POST")) {
-      if (!rateLimit.checkGlobal(request.method)) {
-        const retryAfter = rateLimit.retryAfter(request.method);
-        const res = new Response("Global rate limit exceeded", { status: 429, headers: { "Retry-After": String(retryAfter) } });
-        return c.wrap(res, request);
-      }
-    }
-
-    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-    if (!rateLimit.check(ip) && !isTest) {
-      return c.wrap(new Response("Rate limit exceeded", { status: 429 }), request);
-    }
-
-    switch (request.method) {
-      case "GET":
-        return handleGet(request, storage, slug, c, cache);
-      case "POST":
-        return handlePost(request, storage, slug, c);
-      default:
-        return c.wrap(new Response("Method not allowed", { status: 405 }), request);
-    }
-  },
-};
 
 async function handleGet(
   request: Request,
@@ -120,11 +137,11 @@ async function handlePost(
 async function handleBatch(
   request: Request,
   storage: IStorage,
-  env: Env,
+  integrationTestSecret: string | undefined,
   c: ReturnType<typeof cors.create>,
   cache: ReturnType<typeof createCache>,
 ): Promise<Response> {
-  const { reject, isTest } = checkIntegrationTest(request, env);
+  const { reject, isTest } = checkIntegrationTest(request, integrationTestSecret);
   if (reject) return c.wrap(reject, request);
 
   let body: { slugs?: string[] };

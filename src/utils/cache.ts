@@ -1,7 +1,7 @@
 const cache =
   typeof caches !== "undefined" ? caches.default : undefined;
 
-export function createCache(ctx: ExecutionContext) {
+export function createCache(ctx?: ExecutionContext) {
   return {
     async wrap(
       request: Request,
