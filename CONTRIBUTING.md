@@ -146,6 +146,7 @@ The request pipeline evaluates limits in this order:
 3. **Per-IP rate limit** — 10 req/min per origin IP
 4. **D1 query** — actual database read or write
 5. **Caching** — batch `cache.put()` runs in background (`ctx.waitUntil`), GET cache is stored synchronously
+6. **CORS wrapping** — `cors.wrap()` clones the response and adds origin / security headers, applied after cache so both fresh and cached responses get correct CORS headers
 
 Steps 2 and 3 return `429 Too Many Requests` with `Retry-After` header. A failed step rejects the request before the next step runs.
 

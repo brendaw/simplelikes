@@ -103,6 +103,7 @@ Read responses are cached at the edge using the **Cloudflare Cache API** to redu
 - On cache miss, the response is stored and served with `Cache-Control: public, max-age=<TTL>`
 - The cache is **per-datacenter** — each Cloudflare edge location maintains its own copy; the first request after a write from a new region may still see stale data for up to the TTL
 - New endpoints only need to call `cache.wrap(request, ttl, fetchFn)` — see `src/utils/cache.ts`
+- **CORS headers are applied after cache retrieval**, not baked into cached responses — this guarantees every request gets `Access-Control-Allow-Origin` matching its own `Origin` header, regardless of cache state
 
 ## Security
 
