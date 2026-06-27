@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      skip-typecheck:
+        description: "Skip typecheck stage"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  typecheck:
+    if: ${{ !inputs.skip-typecheck }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+  unit-tests:
+    needs: typecheck
+    if: always() && (needs.typecheck.result == 'success' || needs.typecheck.result == 'skipped')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
