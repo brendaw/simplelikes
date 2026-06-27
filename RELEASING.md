@@ -78,7 +78,7 @@ The script will:
 4. Show a diff of the changes for review
 5. Ask for a final confirmation
 6. Optionally, list open issues and prompt which ones to close — adds `Closes #N` to the commit message and closes them via `gh issue close`
-7. Commit the CHANGELOG, push `main`, and push the tag — triggering the release workflow
+7. Commit the CHANGELOG, push `main`, and push the tag — triggering the Deploy pipeline
 
 The Deploy pipeline will build, deploy to production, run integration tests, and trigger the Release pipeline to create the GitHub Release with changelog notes attached.
 
@@ -119,25 +119,23 @@ The script categorizes commits as:
 
 Commits without a conventional prefix are ignored.
 
-## Fixing a failed release
+## Fixing a failed deploy
 
-The release workflow runs CI checks before deploying. If the checks fail, no production deployment happens.
+The Deploy pipeline runs Build → Deploy → Integration tests. If any stage fails, no production deployment happens.
 
-### CI config or workflow failure (no source change needed)
+### CI or config failure (no source change needed)
 
-Fix the issue in `main`, then re-trigger the release workflow manually via `workflow_dispatch`:
+1. Fix the issue in `main` and push
+2. Go to **Actions → Deploy → Run workflow**
+3. Select **staging** environment and the fixed branch
+4. If staging succeeds, repeat with **production** to deploy the fix
+5. Once production is verified, recreate the release manually via **Actions → Release → Run workflow** with the original tag
 
-1. Fix the issue and push to `main`
-2. Go to **Actions → Release → Run workflow**
-3. Enter the original tag (e.g. `v0.1.0`) in the **"Tag to release"** field
-4. Click **Run workflow**
-
-### Source code failure (`src/` needs a fix)
+### Source code failure (`src/` needs a fix on an existing tag)
 
 Fix the code, commit, and move the tag to the new commit:
 
 ```bash
-# fix the issue, then:
 git add src/...
 git commit -m "fix: ..."
 
@@ -146,18 +144,28 @@ git push origin main
 git push --force origin v0.1.0
 ```
 
-Pushing the tag again re-triggers the release workflow automatically.
+Pushing the tag again re-triggers the Deploy pipeline automatically.
+
+### Integration test failure after deploy
+
+If the deploy succeeded but integration tests failed:
+
+1. Investigate the failure — it may be an environment issue (D1 unavailability, DNS) rather than code
+2. Fix the root cause
+3. If no code change needed: re-run the **Deploy** workflow manually for the same environment
+4. If code change needed: fix, commit, push the tag again (see above)
 
 ## Recreating or backfilling a release for an existing tag
 
-If a GitHub Release needs to be (re)generated for an older tag, trigger the workflow manually:
+If a GitHub Release needs to be (re)generated for an older tag:
 
 1. Go to **Actions → Release → Run workflow**
-2. Keep the branch set to **`main`**
-3. Enter the tag in the **"Tag to release"** field (e.g. `v0.1.0`)
-4. Click **Run workflow**
+2. Enter the tag in the **"Tag to release"** field (e.g. `v0.1.0`)
+3. Click **Run workflow**
 
-The workflow checks out `main` for the workflow files, then checks out the specified tag for the source — parsing its CHANGELOG entry and creating or updating the GitHub Release accordingly.
+The workflow checks out the specified tag, parses its CHANGELOG entry, and creates or updates the GitHub Release accordingly.
+
+> The Release workflow does not run Build or Deploy — it only creates the GitHub Release from the CHANGELOG. For production deploy, use the Deploy workflow.
 
 ## When not to create a release
 

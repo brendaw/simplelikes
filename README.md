@@ -2,7 +2,7 @@
   <img src="https://badgen.net/github/license/brendaw/simplelikes">
   <img src="https://badgen.net/badge/status/active/green">
   <img src="https://img.shields.io/badge/Cloudflare-Workers%20%2B%20D1-F38020?logo=cloudflare&logoColor=white">
-  <a href="https://github.com/brendaw/simplelikes/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/brendaw/simplelikes/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/brendaw/simplelikes/actions/workflows/build.yml"><img alt="Build" src="https://github.com/brendaw/simplelikes/actions/workflows/build.yml/badge.svg"></a>
   <a href="https://github.com/brendaw/simplelikes/actions/workflows/deploy.yml"><img alt="Deploy" src="https://github.com/brendaw/simplelikes/actions/workflows/deploy.yml/badge.svg"></a>
   <a href="https://github.com/brendaw/simplelikes/issues"><img alt="Issues" src="https://badgen.net/github/open-issues/brendaw/simplelikes"></a>
 </p>
@@ -285,9 +285,9 @@ simplelikes/
 │   ├── ISSUE_TEMPLATE/       Bug report + feature request templates
 │   ├── pull_request_template.md
 │   └── workflows/
-│       ├── ci.yml            Reusable typecheck + tests (workflow_call)
-│       ├── deploy.yml        Staging on push, production on tag + manual dispatch
-│       └── release.yml       GitHub Release on tag + manual dispatch
+│       ├── build.yml         Typecheck + unit tests (workflow_call + workflow_dispatch)
+│       ├── deploy.yml        Build → Deploy → Integration tests → (if production) Release
+│       └── release.yml       GitHub Release (workflow_dispatch only)
 ├── scripts/
 │   ├── release.sh            Automated release flow
 │   ├── changelog.sh          CHANGELOG generation from conventional commits

@@ -182,13 +182,22 @@ Before adding a new endpoint, ask:
 - Does it operate on a single resource with just a path param? → GET
 - Is it a write? → POST
 
-## CI checks
+## CI/CD pipeline
 
-| Workflow | Trigger | Checks |
+| Workflow | Trigger | Stages |
 |---|---|---|
-| **CI** | Called by deploy/release workflows | Type check + unit tests |
-| **Deploy** | Push to `main`, push to tag, `workflow_dispatch` | Calls CI, then deploys to staging (branch) or production (tag) |
-| **Release** | Push to tag, `workflow_dispatch` | Calls CI, then creates GitHub Release from CHANGELOG |
+| **Build** | Called by Deploy, `workflow_dispatch` | Typecheck → Unit tests with coverage (threshold 95%) |
+| **Deploy** | Push to `main`, push to tag, `workflow_dispatch` | Build → Deploy (staging/production) → Integration tests → (if production) Trigger Release |
+| **Release** | `workflow_dispatch` only | Create GitHub Release from CHANGELOG |
+
+The pipeline chain flows automatically:
+
+```
+Push main ──► Build ──► Deploy staging ──► Integration tests ──► done
+Push tag  ──► Build ──► Deploy production ──► Integration tests ──► Release
+```
+
+All three workflows can also be triggered manually via `workflow_dispatch` for reprocessing. See [MAINTAINERS.md](MAINTAINERS.md) for details.
 
 ---
 
