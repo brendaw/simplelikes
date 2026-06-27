@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.4](https://github.com/brendaw/simplelikes/releases/tag/v0.5.4) - 2026-06-27
+
+### Fixed
+
+- Add actions/checkout before gh workflow run to provide git context
+
 ## [0.5.3](https://github.com/brendaw/simplelikes/releases/tag/v0.5.3) - 2026-06-27
 
 ### Fixed
