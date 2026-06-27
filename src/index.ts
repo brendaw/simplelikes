@@ -37,7 +37,7 @@ export default {
 
     // Route: POST /likes/batch
     if (request.method === "POST" && url.pathname === "/likes/batch") {
-      return handleBatch(request, env, c);
+      return handleBatch(request, env, c, cache);
     }
 
     const { reject, isTest } = checkIntegrationTest(request, env);
@@ -144,6 +144,7 @@ async function handleBatch(
   request: Request,
   env: Env,
   c: ReturnType<typeof cors.create>,
+  cache: ReturnType<typeof createCache>,
 ): Promise<Response> {
   const { reject, isTest } = checkIntegrationTest(request, env);
   if (reject) return c.wrap(reject, request);
@@ -182,20 +183,24 @@ async function handleBatch(
     return c.wrap(new Response("Rate limit exceeded", { status: 429 }), request);
   }
 
-  const placeholders = slugs.map(() => "?");
-  const { results } = await env.DB.prepare(
-    `SELECT slug, count FROM likes WHERE slug IN (${placeholders.join(",")})`,
-  )
-    .bind(...slugs)
-    .all<{ slug: string; count: number }>();
+  const key = await cache.batchKey(slugs);
 
-  const result: Record<string, number> = {};
-  for (const slug of slugs) {
-    result[slug] = 0;
-  }
-  for (const row of results) {
-    result[row.slug] = row.count;
-  }
+  return cache.wrap(request, 30, async () => {
+    const placeholders = slugs.map(() => "?");
+    const { results } = await env.DB.prepare(
+      `SELECT slug, count FROM likes WHERE slug IN (${placeholders.join(",")})`,
+    )
+      .bind(...slugs)
+      .all<{ slug: string; count: number }>();
 
-  return c.wrap(Response.json({ slugs: result }), request);
+    const result: Record<string, number> = {};
+    for (const slug of slugs) {
+      result[slug] = 0;
+    }
+    for (const row of results) {
+      result[row.slug] = row.count;
+    }
+
+    return c.wrap(Response.json({ slugs: result }), request);
+  }, key);
 }
