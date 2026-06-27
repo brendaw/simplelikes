@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 
 const BASE_URL = process.env.INTEGRATION_TEST_URL || "https://simplelikes-staging.william-brendaw.workers.dev";
 const SECRET = process.env.INTEGRATION_TEST_SECRET;
+const EXPECTED_ORIGIN = process.env.EXPECTED_ORIGIN;
 
 const describeIf = SECRET ? describe : describe.skip;
 
@@ -83,10 +84,13 @@ describeIf("integration tests", () => {
   });
 
   it("CORS headers are present on responses", async () => {
+    if (!EXPECTED_ORIGIN) {
+      throw new Error("EXPECTED_ORIGIN environment variable must be set to run CORS tests");
+    }
     const res = await fetch(`${BASE_URL}/likes/${slug}`, {
-      headers: { ...headers(), Origin: "https://williambrendaw.com" },
+      headers: { ...headers(), Origin: EXPECTED_ORIGIN },
     });
-    expect(res.headers.get("access-control-allow-origin")).toBe("https://williambrendaw.com");
+    expect(res.headers.get("access-control-allow-origin")).toBe(EXPECTED_ORIGIN);
     expect(res.headers.get("x-content-type-options")).toBe("nosniff");
     expect(res.headers.get("x-frame-options")).toBe("DENY");
   });
