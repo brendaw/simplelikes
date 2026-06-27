@@ -1,8 +1,10 @@
 name: Release
 
-run-name: Release ${{ inputs.tag }}
-
 on:
+  workflow_run:
+    workflows: ["Deploy"]
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       tag:
@@ -10,21 +12,36 @@ on:
         required: true
         type: string
 
+run-name: Release ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.workflow_run.head_branch }}
+
 permissions:
   contents: write
 
 jobs:
   release:
     runs-on: ubuntu-24.04
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       startsWith(github.event.workflow_run.head_branch, 'v'))
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.workflow_run.head_branch }}
+
+      - name: Get tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Generate release notes
         id: changelog
         run: |
-          TAG="${{ inputs.tag }}"
+          TAG="${{ steps.tag.outputs.tag }}"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           awk -v tag="${TAG#v}" '
             $0 ~ "^## \\[" tag "\\]" { found=1; next }

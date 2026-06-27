@@ -115,18 +115,3 @@ jobs:
           INTEGRATION_TEST_URL: ${{ steps.env.outputs.url }}
           EXPECTED_ORIGIN: ${{ secrets.ALLOWED_ORIGINS }}
 
-  trigger-release:
-    needs: integration-tests
-    if: needs.integration-tests.result == 'success' && needs.integration-tests.outputs.environment == 'production' && startsWith(github.ref_name, 'v')
-    permissions:
-      actions: write
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Trigger Release Workflow
-        run: |
-          gh workflow run release.yml \
-            -f tag=${{ github.ref_name }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
