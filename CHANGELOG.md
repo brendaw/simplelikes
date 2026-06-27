@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.1](https://github.com/brendaw/simplelikes/releases/tag/v0.5.1) - 2026-06-27
+
+### Fixed
+
+- Resolve batch key as valid HTTP URL for Cache API
+
+### Changed
+
+- Add GitHub Secrets table, update integration test instructions
+- Pass EXPECTED_ORIGIN secret to integration tests
+- Read EXPECTED_ORIGIN from env, fail with clear message
+
 ## [0.5.0](https://github.com/brendaw/simplelikes/releases/tag/v0.5.0) - 2026-06-26
 
 ### Added
