@@ -61,6 +61,8 @@ jobs:
     if: github.event.inputs.environment == 'production'
     runs-on: ubuntu-24.04
     environment: production
+    permissions:
+      actions: write
     steps:
       - uses: actions/checkout@v4
 
@@ -84,6 +86,13 @@ jobs:
         run: npm run deploy:production
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Trigger Release
+        run: |
+          gh workflow run release.yml \
+            -f tag="${{ github.ref_name }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   integration-tests:
     needs: [deploy-staging, deploy-production]

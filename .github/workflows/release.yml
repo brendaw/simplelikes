@@ -1,10 +1,6 @@
 name: Release
 
 on:
-  workflow_run:
-    workflows: ["Deploy"]
-    types:
-      - completed
   workflow_dispatch:
     inputs:
       tag:
@@ -12,7 +8,7 @@ on:
         required: true
         type: string
 
-run-name: "Release: ${{ inputs.tag || github.event.workflow_run.head_branch || 'manual' }}"
+run-name: "Release: ${{ inputs.tag || 'manual' }}"
 
 permissions:
   contents: write
@@ -20,23 +16,15 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-24.04
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       startsWith(github.event.workflow_run.head_branch, 'v'))
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.workflow_run.head_branch }}
+          ref: ${{ inputs.tag }}
 
       - name: Get tag
         id: tag
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag=${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_OUTPUT"
-          fi
+          echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
 
       - name: Generate release notes
         id: changelog
