@@ -1,6 +1,6 @@
 name: Deploy
 
-run-name: Deploy ${{ github.event.inputs.environment == 'production' && format('Production ({0})', github.ref_name) || format('Staging ({0})', github.sha) }}
+run-name: Deploy ${{ github.event.inputs.environment == 'production' && format('Production ({0})', github.ref_name) || format('Staging ({0})', github.event.inputs.sha || github.sha) }}
 
 on:
   workflow_dispatch:
@@ -13,6 +13,10 @@ on:
         options:
           - staging
           - production
+      sha:
+        description: "Short commit SHA for display"
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

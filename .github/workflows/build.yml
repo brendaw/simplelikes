@@ -70,8 +70,10 @@ jobs:
 
       - name: Trigger Deploy
         run: |
+          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
           gh workflow run deploy.yml \
             -f environment=${{ steps.env.outputs.environment }} \
+            -f sha="$SHA_SHORT" \
             --ref ${{ github.ref_name }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
