@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.1](https://github.com/brendaw/simplelikes/releases/tag/v0.6.1) - 2026-06-27
+
+### Fixed
+
+- Use short SHA for staging run-name
+
+### Changed
+
+- Replace gh workflow run with native workflow_run chaining
+
 ## [0.6.0](https://github.com/brendaw/simplelikes/releases/tag/v0.6.0) - 2026-06-27
 
 ### Added
