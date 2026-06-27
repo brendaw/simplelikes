@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.3](https://github.com/brendaw/simplelikes/releases/tag/v0.6.3) - 2026-06-27
+
+### Changed
+
+- Attach distribution archive to GitHub Release
+- Simplify workflow run-name format
+- Pass --ref tag to release workflow trigger
+
 ## [0.6.2](https://github.com/brendaw/simplelikes/releases/tag/v0.6.2) - 2026-06-27
 
 ### Changed
