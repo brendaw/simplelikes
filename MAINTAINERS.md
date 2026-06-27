@@ -96,7 +96,7 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
 - **Trigger manual:** `workflow_dispatch` com input `environment` (staging/production)
 - **Estágios:** Build → Deploy → Integration tests → (se produção) Trigger Release
 - **Integration tests:** rodam automaticamente contra a URL do ambiente deployado, usando `INTEGRATION_TEST_SECRET` para bypass do rate limit e `ALLOWED_ORIGINS` via `EXPECTED_ORIGIN` para validação CORS
-- **Release trigger:** only em produção com tag — `gh workflow run release.yml` com `GITHUB_TOKEN`
+- **Release trigger:** only em produção com tag — checa `integration-tests.result == 'success'` (não `success()`, que falharia com o `deploy-staging` skipped em push de tag) — `gh workflow run release.yml` com `GITHUB_TOKEN`
 
 ### Release
 

@@ -123,7 +123,7 @@ jobs:
 
   trigger-release:
     needs: integration-tests
-    if: success() && needs.integration-tests.outputs.environment == 'production' && github.ref_type == 'tag'
+    if: needs.integration-tests.result == 'success' && needs.integration-tests.outputs.environment == 'production' && github.ref_type == 'tag'
     permissions:
       actions: write
     runs-on: ubuntu-24.04
