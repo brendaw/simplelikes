@@ -1,6 +1,6 @@
 name: Build
 
-run-name: "Build: ${{ github.ref_type == 'tag' && github.ref_name || github.event.head_commit.message || github.ref_name || 'manual' }}"
+run-name: "${{ github.ref_type == 'tag' && github.ref_name || github.event.head_commit.message || github.ref_name || 'manual' }}"
 
 on:
   push:

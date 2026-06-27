@@ -8,7 +8,7 @@ on:
         required: true
         type: string
 
-run-name: "Release: ${{ inputs.tag || 'manual' }}"
+run-name: "Release ${{ inputs.tag || 'manual' }}"
 
 permissions:
   contents: write

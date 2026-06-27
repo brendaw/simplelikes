@@ -1,6 +1,6 @@
 name: Deploy
 
-run-name: "Deploy: ${{ github.event.inputs.environment == 'production' && github.ref_name || github.event.inputs.commit_message || github.event.inputs.sha || 'manual' }}"
+run-name: "${{ github.event.inputs.environment == 'production' && github.ref_name || github.event.inputs.commit_message || github.event.inputs.sha || 'manual' }}"
 
 on:
   workflow_dispatch:
