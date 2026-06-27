@@ -2,15 +2,13 @@ import { createCache } from "./utils/cache";
 import { cors } from "./utils/cors";
 import { rateLimit } from "./utils/rate-limit";
 import { validateSlug } from "./utils/validate";
+import type { IStorage } from "./storage/types";
+import { D1Storage } from "./storage/d1";
 
 interface Env {
   DB: D1Database;
   ALLOWED_ORIGINS?: string;
   INTEGRATION_TEST_SECRET?: string;
-}
-
-interface LikeRow {
-  count: number;
 }
 
 function checkIntegrationTest(request: Request, env: Env): { reject?: Response; isTest: boolean } {
@@ -26,6 +24,7 @@ function checkIntegrationTest(request: Request, env: Env): { reject?: Response; 
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const storage = new D1Storage(env.DB);
     const cache = createCache(ctx);
     const c = cors.create(env.ALLOWED_ORIGINS);
 
@@ -37,7 +36,7 @@ export default {
 
     // Route: POST /likes/batch
     if (request.method === "POST" && url.pathname === "/likes/batch") {
-      return handleBatch(request, env, c, cache);
+      return handleBatch(request, storage, env, c, cache);
     }
 
     const { reject, isTest } = checkIntegrationTest(request, env);
@@ -66,9 +65,9 @@ export default {
 
     switch (request.method) {
       case "GET":
-        return handleGet(request, env, slug, c, cache);
+        return handleGet(request, storage, slug, c, cache);
       case "POST":
-        return handlePost(request, env, slug, c);
+        return handlePost(request, storage, slug, c);
       default:
         return c.wrap(new Response("Method not allowed", { status: 405 }), request);
     }
@@ -77,26 +76,20 @@ export default {
 
 async function handleGet(
   request: Request,
-  env: Env,
+  storage: IStorage,
   slug: string,
   c: ReturnType<typeof cors.create>,
   cache: ReturnType<typeof createCache>,
 ): Promise<Response> {
   return cache.wrap(request, 60, async () => {
-    const row = await env.DB.prepare("SELECT count FROM likes WHERE slug = ?")
-      .bind(slug)
-      .first<LikeRow>();
-
-    return c.wrap(
-      Response.json({ slug, count: row?.count ?? 0 }),
-      request,
-    );
+    const count = await storage.getCount(slug);
+    return c.wrap(Response.json({ slug, count }), request);
   });
 }
 
 async function handlePost(
   request: Request,
-  env: Env,
+  storage: IStorage,
   slug: string,
   c: ReturnType<typeof cors.create>,
 ): Promise<Response> {
@@ -105,43 +98,28 @@ async function handlePost(
     return c.wrap(new Response("X-Visitor-Id header required", { status: 400 }), request);
   }
 
-  const existing = await env.DB.prepare(
-    "SELECT 1 FROM likes_visitors WHERE slug = ? AND visitor_id = ?",
-  )
-    .bind(slug, visitorId)
-    .first();
+  const existing = await storage.hasVisitor(slug, visitorId);
 
   if (existing) {
-    const row = await env.DB.prepare("SELECT count FROM likes WHERE slug = ?")
-      .bind(slug)
-      .first<LikeRow>();
+    const count = await storage.getCount(slug);
     return c.wrap(
-      Response.json({ slug, count: row?.count ?? 0, alreadyLiked: true }),
+      Response.json({ slug, count, alreadyLiked: true }),
       request,
     );
   }
 
-  await env.DB.batch([
-    env.DB.prepare(
-      "INSERT INTO likes (slug, count) VALUES (?, 1) ON CONFLICT(slug) DO UPDATE SET count = count + 1",
-    ).bind(slug),
-    env.DB.prepare(
-      "INSERT INTO likes_visitors (slug, visitor_id, created_at) VALUES (?, ?, datetime('now'))",
-    ).bind(slug, visitorId),
-  ]);
+  await storage.increment(slug, visitorId);
 
-  const row = await env.DB.prepare("SELECT count FROM likes WHERE slug = ?")
-    .bind(slug)
-    .first<LikeRow>();
-
+  const count = await storage.getCount(slug);
   return c.wrap(
-    Response.json({ slug, count: row?.count ?? 1, alreadyLiked: false }),
+    Response.json({ slug, count: count || 1, alreadyLiked: false }),
     request,
   );
 }
 
 async function handleBatch(
   request: Request,
+  storage: IStorage,
   env: Env,
   c: ReturnType<typeof cors.create>,
   cache: ReturnType<typeof createCache>,
@@ -186,21 +164,7 @@ async function handleBatch(
   const key = await cache.batchKey(slugs);
 
   return cache.wrap(request, 30, async () => {
-    const placeholders = slugs.map(() => "?");
-    const { results } = await env.DB.prepare(
-      `SELECT slug, count FROM likes WHERE slug IN (${placeholders.join(",")})`,
-    )
-      .bind(...slugs)
-      .all<{ slug: string; count: number }>();
-
-    const result: Record<string, number> = {};
-    for (const slug of slugs) {
-      result[slug] = 0;
-    }
-    for (const row of results) {
-      result[row.slug] = row.count;
-    }
-
+    const result = await storage.batchGet(slugs);
     return c.wrap(Response.json({ slugs: result }), request);
   }, key);
 }
