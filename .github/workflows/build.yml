@@ -1,6 +1,6 @@
 name: Build
 
-run-name: "Build: ${{ github.event_name == 'push' && github.event.head_commit.message || github.ref_name }}"
+run-name: "Build: ${{ github.ref_type == 'tag' && github.ref_name || github.event.head_commit.message || github.ref_name || 'manual' }}"
 
 on:
   push:
@@ -70,12 +70,22 @@ jobs:
             echo "environment=staging" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Get display message
+        id: msg
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "value=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value<<EOF" >> "$GITHUB_OUTPUT"
+            git log --format=%s -1 "${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Trigger Deploy
         run: |
-          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
           gh workflow run deploy.yml \
             -f environment=${{ steps.env.outputs.environment }} \
-            -f sha="$SHA_SHORT" \
+            -f commit_message="${{ steps.msg.outputs.value }}" \
             --ref ${{ github.ref_name }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

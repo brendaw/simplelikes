@@ -1,10 +1,14 @@
 name: Deploy
 
-run-name: Deploy ${{ github.event.inputs.environment == 'production' && format('Production ({0})', github.ref_name) || format('Staging ({0})', github.event.inputs.sha || github.sha) }}
+run-name: "Deploy: ${{ github.event.inputs.environment == 'production' && github.ref_name || github.event.inputs.commit_message || github.event.inputs.sha || 'manual' }}"
 
 on:
   workflow_dispatch:
     inputs:
+      commit_message:
+        description: "Commit message or tag for workflow name display"
+        required: false
+        type: string
       environment:
         description: "Target environment"
         required: true
