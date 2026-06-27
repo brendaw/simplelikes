@@ -89,6 +89,21 @@ curl -X POST https://simplelikes.workers.dev/likes/batch \
 | 405 | Method not allowed |
 | 429 | Rate limit exceeded (includes `Retry-After` header) |
 
+### Caching
+
+Read responses are cached at the edge using the **Cloudflare Cache API** to reduce D1 reads and improve latency.
+
+| Endpoint | Cache TTL | Cache key |
+|---|---|---|
+| `GET /likes/:slug` | 60s | Request URL |
+| `POST /likes/batch` | 30s | SHA-256 hash of sorted slugs |
+
+- Only **200 OK** responses are cached — errors and 4xx pass through
+- On cache hit, the response is returned instantly without querying D1
+- On cache miss, the response is stored and served with `Cache-Control: public, max-age=<TTL>`
+- The cache is **per-datacenter** — each Cloudflare edge location maintains its own copy; the first request after a write from a new region may still see stale data for up to the TTL
+- New endpoints only need to call `cache.wrap(request, ttl, fetchFn)` — see `src/utils/cache.ts`
+
 ## Security
 
 simplelikes is designed with defense in depth:
@@ -217,6 +232,7 @@ simplelikes/
 │   ├── index.ts              Worker handler
 │   ├── db/schema.sql         D1 schema
 │   └── utils/
+│       ├── cache.ts          Cloudflare Cache API wrapper (60s GET, 30s batch)
 │       ├── cors.ts           CORS whitelist + security headers
 │       ├── rate-limit.ts     Per-IP + global rate limiting
 │       └── validate.ts       Slug validation
@@ -224,6 +240,7 @@ simplelikes/
 │   └── likes.js              Client-side integration example
 ├── vitest.config.ts          Vitest config (coverage, thresholds)
 ├── test/
+│   ├── cache.test.ts             Unit: Cache API wrap + batchKey
 │   ├── likes.test.ts             Unit: validate utils
 │   ├── rate-limit.test.ts        Unit: rate limit logic
 │   ├── cors.test.ts              Unit: CORS whitelist + security headers
