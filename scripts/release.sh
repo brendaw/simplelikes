@@ -140,6 +140,14 @@ git push origin main
 echo "→ Pushing tag $TAG..."
 git push origin "$TAG"
 
+if ! git ls-remote origin "refs/tags/$TAG" | grep -q .; then
+	echo ""
+	echo "✗ Tag $TAG was not pushed to remote."
+	echo "  Push it manually:"
+	echo "    git push origin $TAG"
+	exit 1
+fi
+
 echo ""
 echo "✓ Release $TAG pushed."
 echo "  GitHub Actions release and deploy triggered automatically."
