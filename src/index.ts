@@ -1,3 +1,4 @@
+import { createCache } from "./utils/cache";
 import { cors } from "./utils/cors";
 import { rateLimit } from "./utils/rate-limit";
 import { validateSlug } from "./utils/validate";
@@ -24,7 +25,8 @@ function checkIntegrationTest(request: Request, env: Env): { reject?: Response; 
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const cache = createCache(ctx);
     const c = cors.create(env.ALLOWED_ORIGINS);
 
     if (request.method === "OPTIONS") {
@@ -64,7 +66,7 @@ export default {
 
     switch (request.method) {
       case "GET":
-        return handleGet(request, env, slug, c);
+        return handleGet(request, env, slug, c, cache);
       case "POST":
         return handlePost(request, env, slug, c);
       default:
@@ -78,15 +80,18 @@ async function handleGet(
   env: Env,
   slug: string,
   c: ReturnType<typeof cors.create>,
+  cache: ReturnType<typeof createCache>,
 ): Promise<Response> {
-  const row = await env.DB.prepare("SELECT count FROM likes WHERE slug = ?")
-    .bind(slug)
-    .first<LikeRow>();
+  return cache.wrap(request, 60, async () => {
+    const row = await env.DB.prepare("SELECT count FROM likes WHERE slug = ?")
+      .bind(slug)
+      .first<LikeRow>();
 
-  return c.wrap(
-    Response.json({ slug, count: row?.count ?? 0 }),
-    request,
-  );
+    return c.wrap(
+      Response.json({ slug, count: row?.count ?? 0 }),
+      request,
+    );
+  });
 }
 
 async function handlePost(
