@@ -46,18 +46,16 @@ jobs:
           TAG="${{ steps.tag.outputs.tag }}"
           DIST="dist/simplelikes-${TAG}"
           mkdir -p "${DIST}"
-          rsync -av \
-            src/ \
-            examples/ \
-            scripts/setup.sh \
-            package.json \
-            package-lock.json \
-            tsconfig.json \
-            wrangler.toml.example \
-            .env.example \
-            LICENSE \
-            README.md \
-            "${DIST}/"
+          cp -r src/ "${DIST}/src/"
+          cp -r examples/ "${DIST}/examples/"
+          cp package.json "${DIST}/"
+          cp tsconfig.json "${DIST}/"
+          cp wrangler.toml.example "${DIST}/"
+          cp LICENSE "${DIST}/"
+          cp README.md "${DIST}/"
+          [ -f scripts/setup.sh ] && cp scripts/setup.sh "${DIST}/scripts/"
+          [ -f package-lock.json ] && cp package-lock.json "${DIST}/"
+          [ -f .env.example ] && cp .env.example "${DIST}/"
           cd dist
           zip -r "simplelikes-${TAG}.zip" "simplelikes-${TAG}/"
 
