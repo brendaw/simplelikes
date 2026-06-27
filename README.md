@@ -127,7 +127,7 @@ simplelikes is designed with defense in depth:
 npm run setup
 ```
 
-This auto-detects your D1 databases, creates `.env` with real IDs, copies `wrangler.toml.example`, and applies the schema.
+This auto-detects your D1 databases, generates `wrangler.toml` with real IDs, and applies the schema to remote databases.
 
 #### Manual setup
 
@@ -217,9 +217,13 @@ cp .env.example .env
 cp wrangler.toml.example wrangler.toml
 ```
 
-The `wrangler.toml` uses `__PLACEHOLDER__` variables (e.g. `__STAGING_DATABASE_ID__`) that are replaced with real values by `scripts/setup.sh` during local setup or by CI via `sed` during deployment. For local dev, no Cloudflare account is required — a local SQLite database is used.
+The `wrangler.toml` uses `__PLACEHOLDER__` variables:
+- `__STAGING_DATABASE_ID__` / `__PRODUCTION_DATABASE_ID__` — replaced by `scripts/setup.sh`
+- `__INTEGRATION_TEST_SECRET__` / `__ALLOWED_ORIGINS__` — replaced by CI (`deploy.yml`) or by `scripts/setup.sh` (reads from `.env` if available)
 
-For Cloudflare deployment, use `npm run setup` to auto-detect databases and generate both files.
+For local dev, no Cloudflare account is required — a local SQLite database is used and `__ALLOWED_ORIGINS__` defaults to `http://localhost:8787`.
+
+For Cloudflare deployment, run `npm run setup` to auto-detect databases, generate `wrangler.toml` with real IDs, and apply the schema. If you have `.env` configured, `setup.sh` also populates `__INTEGRATION_TEST_SECRET__` and `__ALLOWED_ORIGINS__` from it.
 
 ## Client-side usage
 

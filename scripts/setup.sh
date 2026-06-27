@@ -34,8 +34,19 @@ echo "✅ Production DB: $PROD_DB_ID"
 echo "✅ Staging DB:    $STAGING_DB_ID"
 
 echo "📝 Generating $WRANGLER_TOML..."
-sed -e "s/__STAGING_DATABASE_ID__/$STAGING_DB_ID/g" \
-    -e "s/__PRODUCTION_DATABASE_ID__/$PROD_DB_ID/g" \
+
+# Read env values from .env if available
+INTEGRATION_TEST_SECRET="change-me"
+ALLOWED_ORIGINS="http://localhost:8787"
+if [ -f .env ]; then
+  INTEGRATION_TEST_SECRET=$(grep "^INTEGRATION_TEST_SECRET=" .env | cut -d= -f2- || echo "$INTEGRATION_TEST_SECRET")
+  ALLOWED_ORIGINS=$(grep "^ALLOWED_ORIGINS=" .env | cut -d= -f2- || echo "$ALLOWED_ORIGINS")
+fi
+
+sed -e "s|__STAGING_DATABASE_ID__|$STAGING_DB_ID|g" \
+    -e "s|__PRODUCTION_DATABASE_ID__|$PROD_DB_ID|g" \
+    -e "s|__INTEGRATION_TEST_SECRET__|$INTEGRATION_TEST_SECRET|g" \
+    -e "s|__ALLOWED_ORIGINS__|$ALLOWED_ORIGINS|g" \
     wrangler.toml.example > "$WRANGLER_TOML"
 echo "✅ $WRANGLER_TOML created."
 

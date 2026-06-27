@@ -1,7 +1,7 @@
 # Copy to wrangler.toml (gitignored) and replace placeholders with real IDs
 name = "simplelikes"
 main = "src/index.ts"
-compatibility_date = "2025-01-01"
+compatibility_date = "2026-06-01"
 
 [[d1_databases]]
 binding = "DB"
