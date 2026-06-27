@@ -31,47 +31,113 @@ Atualmente sou o único maintainer do projeto. Todo o fluxo de contribuição pa
 - A versão é inferida dos commits convencionais desde o último release
 - O maintainer é responsável por decidir quando um release é cortado
 
-### Releases
-
-- Releases são publicados automaticamente ao push de uma tag `v*`
-- O script `scripts/release.sh` orquestra o processo: detecta versão, gera CHANGELOG, cria tag e push
-- O script `scripts/setup.sh` automatiza o setup local: detecta D1 databases, gera `.env`, aplica schema
-- Mudanças que não afetam `src/` (docs, CI, scripts) não geram release
-- Ver `RELEASING.md` para o fluxo completo
-
 ### Issues
 
 - Issues são bem-vindas para bug reports e feature requests
 - O maintainer aplica labels e define prioridades
 - Issues sem atividade por 60 dias podem ser fechadas por inatividade
 
-## Responsabilidades do maintainer
+## CI/CD Pipeline
 
-1. Revisar e mergear PRs em tempo hábil
-2. Manter a esteira de CI/CD operacional
-3. Planejar e executar releases
-4. Responder a issues e discutir direcionamento do projeto
-5. Manter a documentação do projeto atualizada
-6. Garantir que a API mantenha compatibilidade quando possível
+Três workflows encadeados, cada um acionável individualmente via `workflow_dispatch`:
 
-## Como se tornar um maintainer
+```
+                        ┌────────────────────────────────────────────┐
+                        │                   Build                    │
+                        │  workflow_call / workflow_dispatch         │
+                        │                                            │
+                        │  ┌──────────┐     ┌─────────────┐         │
+                        │  │Typecheck │ ──► │ Unit tests  │         │
+                        │  │(tsc)     │     │ (coverage   │         │
+                        │  │          │     │  ≥95%)      │         │
+                        │  └──────────┘     └─────────────┘         │
+                        └────────────────────┬───────────────────────┘
+                                             │
+                    ┌────────────────────────┼────────────────────────┐
+                    ▼                        ▼                        │
+┌──────────────────────────────────┐  ┌──────────────────────────────────┐
+│          Push main               │  │       Push tag v*               │
+│    ┌──────────────────────┐      │  │  ┌──────────────────────┐       │
+│    │  Deploy staging      │      │  │  │  Deploy production   │       │
+│    └──────────┬───────────┘      │  │  └──────────┬───────────┘       │
+│               ▼                  │  │             ▼                    │
+│    ┌──────────────────────┐      │  │  ┌──────────────────────┐       │
+│    │ Integration tests    │      │  │  │ Integration tests    │       │
+│    │ (staging URL)        │      │  │  │ (production URL)     │       │
+│    └──────────┬───────────┘      │  │  └──────────┬───────────┘       │
+│               ▼                  │  │             ▼                    │
+│    ┌──────────────────────┐      │  │  ┌──────────────────────┐       │
+│    │        done          │      │  │  │  Trigger Release     │       │
+│    └──────────────────────┘      │  │  └──────────┬───────────┘       │
+└──────────────────────────────────┘  └─────────────┼────────────────────┘
+                                                     │
+                                                     ▼
+                                          ┌──────────────────────┐
+                                          │      Release         │
+                                          │  workflow_dispatch   │
+                                          │                      │
+                                          │  ┌────────────────┐  │
+                                          │  │  GitHub Release │  │
+                                          │  │  (CHANGELOG)    │  │
+                                          │  └────────────────┘  │
+                                          └──────────────────────┘
+```
 
-Não há um processo formal no momento. Contribuidores frequentes e de confiança podem ser convidados a se tornar maintainers. Se você tem interesse, contribua ativamente — issues, PRs, revisões — e entre em contato.
+### Build
 
-## Decisões técnicas
+- **Trigger automático:** chamado pelo Deploy (`workflow_call`)
+- **Trigger manual:** `workflow_dispatch` com input `skip-typecheck` opcional
+- **Estágios:** Typecheck → Unit tests com coverage (threshold 95%)
+- **Uso:** validar rapidamente um branch sem precisar deployar
 
-Direcionamento técnico do projeto é definido pelo maintainer principal. Decisões significativas (mudanças de runtime, alterações de esquema, novos endpoints) são discutidas em issues antes da implementação.
+### Deploy
+
+- **Trigger automático:** push para `main` (staging) ou tag `v*` (produção)
+- **Trigger manual:** `workflow_dispatch` com input `environment` (staging/production)
+- **Estágios:** Build → Deploy → Integration tests → (se produção) Trigger Release
+- **Integration tests:** rodam automaticamente contra a URL do ambiente deployado, usando `INTEGRATION_TEST_SECRET` para bypass do rate limit
+- **Release trigger:** only em produção com tag — `gh workflow run release.yml` com `GITHUB_TOKEN`
+
+### Release
+
+- **Trigger:** `workflow_dispatch` apenas (manual ou via Deploy)
+- **Não escuta `push: tags`** — o Deploy é o único trigger automatizado para evitar disparo duplicado
+- **Estágio único:** Cria GitHub Release a partir da entrada do CHANGELOG para a tag informada
+
+### Fluxo de release completo
+
+1. Desenvolva e faça merge dos PRs em `main`
+2. Execute `./scripts/release.sh` localmente (cria tag e faz push)
+3. O push da tag dispara o Deploy automaticamente
+4. Deploy executa Build → Deploy production → Integration tests
+5. Se os testes integrados passarem, o Release é criado automaticamente
+
+### Reprocessamento manual
+
+Cada pipeline pode ser reexecutado manualmente pelo GitHub Actions UI:
+
+| Pipeline | Inputs | Quando usar |
+|---|---|---|
+| **Build** | `skip-typecheck` (opcional) | Validar um branch específico sem deploy |
+| **Deploy** | `environment` (staging/production) | Redeploy de um ambiente sem novo push |
+| **Release** | `tag` (obrigatório) | Recriar GitHub Release para uma tag existente |
 
 ## Testes de integração
 
-Os testes de integração em `test/integration.test.ts` batem contra o ambiente staging real (`simplelikes-staging.william-brendaw.workers.dev`).
+Os testes de integração em `test/integration.test.ts` batem contra o ambiente staging ou production real (`simplelikes-staging.william-brendaw.workers.dev` ou `simplelikes.william-brendaw.workers.dev`).
+
+### No CI
+
+Rodam automaticamente no pipeline Deploy após o deploy, contra a URL do ambiente recém-deployado. Usam `INTEGRATION_TEST_SECRET` (GitHub Secret) para bypass do rate limit.
+
+### Localmente
 
 **Pré-requisitos:**
 
 - `INTEGRATION_TEST_SECRET` configurado no `.env` (mesmo valor do GitHub Secret)
-- Staging deployada com a versão mais recente do código (o guarda `X-Integration-Test` é necessário para bypass do rate limit)
+- Staging deployada com a versão mais recente do código (o header `X-Integration-Test` é necessário para bypass do rate limit)
 
-**Executar localmente:**
+**Executar:**
 
 ```bash
 INTEGRATION_TEST_SECRET=$(grep INTEGRATION_TEST_SECRET .env | cut -d= -f2) npm run test:integration
@@ -89,7 +155,41 @@ O projeto usa `@vitest/coverage-v8` com threshold mínimo de **95%** em statemen
 npm run test:coverage
 ```
 
-O coverage é verificado automaticamente no CI — o build quebra se o threshold não for atingido. Atualmente a base de código está em **100% de coverage**.
+O coverage é verificado automaticamente no Build (CI) — o pipeline quebra se o threshold não for atingido. Atualmente a base de código está em **100% de coverage**.
+
+## Hotfix e rollback
+
+### Hotfix
+
+1. Crie um branch do `main`, aplique o fix, PR e merge
+2. Execute `./scripts/release.sh` para gerar uma tag `v<patch>`
+3. O push da tag dispara Deploy production → Integration tests → Release
+
+### Rollback
+
+O Wrangler não suporta rollback nativo de versões. Para reverter:
+
+1. Faça checkout do commit ou tag anterior desejado
+2. Dispare o Deploy manualmente via `workflow_dispatch` com o ref desejado e `environment: production`
+3. O pipeline executa Build → Deploy → Integration tests normalmente
+4. Se os testes falharem no ambiente anterior, o Release não é disparado
+
+## Responsabilidades do maintainer
+
+1. Revisar e mergear PRs em tempo hábil
+2. Manter a esteira de CI/CD operacional
+3. Planejar e executar releases
+4. Responder a issues e discutir direcionamento do projeto
+5. Manter a documentação do projeto atualizada
+6. Garantir que a API mantenha compatibilidade quando possível
+
+## Como se tornar um maintainer
+
+Não há um processo formal no momento. Contribuidores frequentes e de confiança podem ser convidados a se tornar maintainers. Se você tem interesse, contribua ativamente — issues, PRs, revisões — e entre em contato.
+
+## Decisões técnicas
+
+Direcionamento técnico do projeto é definido pelo maintainer principal. Decisões significativas (mudanças de runtime, alterações de esquema, novos endpoints) são discutidas em issues antes da implementação.
 
 ---
 
