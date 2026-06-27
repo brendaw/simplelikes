@@ -41,9 +41,30 @@ jobs:
             echo "" > _release_notes.md
           fi
 
+      - name: Build distribution archive
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          DIST="dist/simplelikes-${TAG}"
+          mkdir -p "${DIST}"
+          rsync -av \
+            src/ \
+            examples/ \
+            scripts/setup.sh \
+            package.json \
+            package-lock.json \
+            tsconfig.json \
+            wrangler.toml.example \
+            .env.example \
+            LICENSE \
+            README.md \
+            "${DIST}/"
+          cd dist
+          zip -r "simplelikes-${TAG}.zip" "simplelikes-${TAG}/"
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.changelog.outputs.tag }}
           body_path: _release_notes.md
+          files: dist/simplelikes-${{ steps.changelog.outputs.tag }}.zip
           generate_release_notes: false
