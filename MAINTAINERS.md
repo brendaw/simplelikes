@@ -81,7 +81,7 @@ Os testes são pulados automaticamente se `INTEGRATION_TEST_SECRET` não estiver
 
 ## Cobertura de código
 
-O projeto usa `@vitest/coverage-v8` com threshold mínimo de **90%** em statements, branches, functions e lines.
+O projeto usa `@vitest/coverage-v8` com threshold mínimo de **95%** em statements, branches, functions e lines.
 
 **Executar:**
 

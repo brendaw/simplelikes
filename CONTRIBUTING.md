@@ -93,7 +93,7 @@ The repository includes an `.editorconfig` file. Most editors support it nativel
 | `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |
 | `npm test` | Run unit tests (Vitest) |
-| `npm run test:coverage` | Run unit tests with coverage report (threshold: 90%) |
+| `npm run test:coverage` | Run unit tests with coverage report (threshold: 95%) |
 | `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET`) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run deploy` | Deploy to Cloudflare Workers |

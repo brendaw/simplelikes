@@ -12,7 +12,7 @@ This document describes the release process for maintainers of simplelikes.
 | `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |
 | `npm test` | Run unit tests (Vitest) |
-| `npm run test:coverage` | Run unit tests with coverage report (threshold: 90%) |
+| `npm run test:coverage` | Run unit tests with coverage report (threshold: 95%) |
 | `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET`) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run changelog` | Refresh `[Unreleased]` section in CHANGELOG from conventional commits |
@@ -24,13 +24,15 @@ This document describes the release process for maintainers of simplelikes.
 | `scripts/changelog.sh` | Generates CHANGELOG entries from conventional commits; run standalone to refresh [Unreleased] or during release workflow |
 | `scripts/setup.sh` | One-command setup: detects D1 databases, generates `.env`, copies config, applies schema |
 
-## CI/CD pipeline
+## Pipeline chain
+
+### Workflows
 
 | Workflow | Triggers | Description |
 |---|---|---|
-| `ci.yml` | Called by deploy/release workflows | Type check + unit tests |
-| `deploy.yml` | Push to `main`, push to tag, `workflow_dispatch` | Validates via CI, then deploys to staging (branch) or production (tag) |
-| `release.yml` | Push to tag, `workflow_dispatch` | Validates via CI, then creates GitHub Release from CHANGELOG |
+| `build.yml` | Called by Deploy, `workflow_dispatch` | Typecheck → Unit tests with coverage (threshold 95%) |
+| `deploy.yml` | Push to `main`, push to tag, `workflow_dispatch` | Build → Deploy (staging/production) → Integration tests → (if production) → Release |
+| `release.yml` | `workflow_dispatch` | Create GitHub Release from CHANGELOG |
 
 ### Lifecycle
 
@@ -40,10 +42,18 @@ This document describes the release process for maintainers of simplelikes.
 | Pre-PR validation — run tests before opening a PR | Contributor | `npm test` |
 | Release — when ready to publish a new version | Maintainer | `scripts/release.sh` |
 
+### Pipeline chain
+
+```
+Push main ──► Build ──► Deploy staging ──► Integration tests ──► done
+Push tag  ──► Build ──► Deploy production ──► Integration tests ──► Release
+```
+
 ### Manual triggers
 
-Both Deploy and Release workflows support `workflow_dispatch` for manual execution:
+All workflows support `workflow_dispatch` for manual execution:
 
+- **Build:** Optionally skip typecheck for quick iterations
 - **Deploy:** Choose environment (`staging` or `production`) to deploy without a git push
 - **Release:** Enter a tag (e.g. `v0.1.0`) to (re)generate a GitHub Release for that tag
 
@@ -70,7 +80,7 @@ The script will:
 6. Optionally, list open issues and prompt which ones to close — adds `Closes #N` to the commit message and closes them via `gh issue close`
 7. Commit the CHANGELOG, push `main`, and push the tag — triggering the release workflow
 
-The CI will deploy to production and create a GitHub Release with changelog notes attached.
+The Deploy pipeline will build, deploy to production, run integration tests, and trigger the Release pipeline to create the GitHub Release with changelog notes attached.
 
 ### Manual steps (without release.sh)
 
