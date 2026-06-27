@@ -1,5 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+function createMockCache() {
+  return {
+    default: {
+      match: vi.fn().mockResolvedValue(undefined),
+      put: vi.fn().mockResolvedValue(undefined),
+    },
+  };
+}
+
 function createMockStmt() {
   return {
     bind: vi.fn().mockReturnThis(),
@@ -14,6 +23,7 @@ function createHandler() {
 
 describe("handler", () => {
   beforeEach(() => {
+    vi.stubGlobal("caches", createMockCache());
     vi.resetModules();
   });
 
