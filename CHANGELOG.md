@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.0](https://github.com/brendaw/simplelikes/releases/tag/v0.6.0) - 2026-06-27
+
+### Added
+
+- Add run-name to Release and Deploy workflows
+- Add run-name to Deploy workflow showing environment and ref
+
+### Fixed
+
+- Use startsWith instead of ref_type to trigger Release
+- Validate tag push with git ls-remote after push
+
 ## [0.5.4](https://github.com/brendaw/simplelikes/releases/tag/v0.5.4) - 2026-06-27
 
 ### Fixed
