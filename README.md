@@ -214,6 +214,7 @@ The script automatically:
 | `npm test` | Run unit tests |
 | `npm run test:coverage` | Run unit tests with coverage report (threshold: 90%) |
 | `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET`) |
+| `npm run test:watch` | Run tests in watch mode |
 | `npm run changelog` | Refresh CHANGELOG [Unreleased] section |
 | `npm run release` | Cut a new release (tag, changelog, push) |
 | `npm run deploy` | Deploy to Cloudflare Workers |
