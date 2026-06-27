@@ -206,7 +206,7 @@ Set environment variables in the process manager config (`ecosystem.config.js` f
 | `ALLOWED_ORIGINS` | `http://localhost:8787` | Comma-separated list of allowed CORS origins |
 | `INTEGRATION_TEST_SECRET` | — | Secret for `X-Integration-Test` header to bypass rate limits in integration tests |
 
-> `ALLOWED_ORIGINS` defaults to the local Wrangler dev server. For deployed workers, override via `wrangler.toml [vars]` or Cloudflare dashboard.
+> `ALLOWED_ORIGINS` defaults to the local Wrangler dev server. For deployed workers, override via `wrangler.toml [vars]` or Cloudflare dashboard. In CI, set the `ALLOWED_ORIGINS` GitHub Secret for the CORS integration test to pass.
 
 ### Local configuration
 
@@ -257,7 +257,7 @@ The script automatically:
 | `npm run typecheck` | TypeScript type checking |
 | `npm test` | Run unit tests |
 | `npm run test:coverage` | Run unit tests with coverage report (threshold: 95%) |
-| `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET`) |
+| `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET` and `EXPECTED_ORIGIN`) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run changelog` | Refresh CHANGELOG [Unreleased] section |
 | `npm run release` | Cut a new release (tag, changelog, push) |

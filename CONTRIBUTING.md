@@ -94,14 +94,14 @@ The repository includes an `.editorconfig` file. Most editors support it nativel
 | `npm run typecheck` | TypeScript type checking |
 | `npm test` | Run unit tests (Vitest) |
 | `npm run test:coverage` | Run unit tests with coverage report (threshold: 95%) |
-| `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET`) |
+| `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET` and `EXPECTED_ORIGIN`) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run deploy` | Deploy to Cloudflare Workers |
 | `npm run serve` | Start standalone Node.js server (VPS / local SQLite — requires `better-sqlite3`) |
 
 `scripts/release.sh`, `scripts/changelog.sh`, and `scripts/setup.sh` are maintainer-only scripts. The setup is also available via `npm run setup` for contributors with Cloudflare access.
 
-`npm run test:integration` requires a valid `INTEGRATION_TEST_SECRET` and is intended for maintainers only. Contributors without the secret will have these tests skipped automatically.
+`npm run test:integration` requires valid `INTEGRATION_TEST_SECRET` and `EXPECTED_ORIGIN` environment variables and is intended for maintainers only. Contributors without the secret will have these tests skipped automatically.
 
 ## API design principles
 
@@ -163,7 +163,7 @@ Every response includes security headers. CORS is configurable via the `ALLOWED_
 | `X-Content-Type-Options` | — | `nosniff` |
 | `X-Frame-Options` | — | `DENY` |
 
-Default allowed origins: `http://localhost:8787`. For production, set `ALLOWED_ORIGINS` to your comma-separated domains (configured via Cloudflare dashboard or CI env vars).
+Default allowed origins: `http://localhost:8787`. For production, set `ALLOWED_ORIGINS` to your comma-separated domains (configured via Cloudflare dashboard or CI env vars). The CI pipeline reads `ALLOWED_ORIGINS` from [GitHub Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) — forks must configure their own secret or the CORS integration test will fail.
 
 ### Key constraints
 

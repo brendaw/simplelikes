@@ -95,7 +95,7 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
 - **Trigger automático:** push para `main` (staging) ou tag `v*` (produção)
 - **Trigger manual:** `workflow_dispatch` com input `environment` (staging/production)
 - **Estágios:** Build → Deploy → Integration tests → (se produção) Trigger Release
-- **Integration tests:** rodam automaticamente contra a URL do ambiente deployado, usando `INTEGRATION_TEST_SECRET` para bypass do rate limit
+- **Integration tests:** rodam automaticamente contra a URL do ambiente deployado, usando `INTEGRATION_TEST_SECRET` para bypass do rate limit e `ALLOWED_ORIGINS` via `EXPECTED_ORIGIN` para validação CORS
 - **Release trigger:** only em produção com tag — `gh workflow run release.yml` com `GITHUB_TOKEN`
 
 ### Release
@@ -122,6 +122,20 @@ Cada pipeline pode ser reexecutado manualmente pelo GitHub Actions UI:
 | **Deploy** | `environment` (staging/production) | Redeploy de um ambiente sem novo push |
 | **Release** | `tag` (obrigatório) | Recriar GitHub Release para uma tag existente |
 
+## GitHub Secrets
+
+Os seguintes segredos devem estar configurados no repositório para o CI/CD funcionar:
+
+| Secret | Finalidade |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Autenticação Wrangler para deploy em staging e production |
+| `D1_STAGING_DATABASE_ID` | ID do banco D1 de staging |
+| `D1_PRODUCTION_DATABASE_ID` | ID do banco D1 de production |
+| `INTEGRATION_TEST_SECRET` | Header `X-Integration-Test` para bypass de rate limit nos testes integrados |
+| `ALLOWED_ORIGINS` | Origem CORS esperada — validada pelos testes de integração via `EXPECTED_ORIGIN` |
+
+**Forks** precisam configurar seus próprios segredos, especialmente `ALLOWED_ORIGINS` com sua própria origem, senão o teste de CORS falhará com a mensagem `EXPECTED_ORIGIN environment variable must be set`.
+
 ## Testes de integração
 
 Os testes de integração em `test/integration.test.ts` batem contra o ambiente staging ou production real (`simplelikes-staging.william-brendaw.workers.dev` ou `simplelikes.william-brendaw.workers.dev`).
@@ -135,12 +149,15 @@ Rodam automaticamente no pipeline Deploy após o deploy, contra a URL do ambient
 **Pré-requisitos:**
 
 - `INTEGRATION_TEST_SECRET` configurado no `.env` (mesmo valor do GitHub Secret)
+- `EXPECTED_ORIGIN` configurado no `.env` (valor do `ALLOWED_ORIGINS` do ambiente — ex: `https://williambrendaw.com`)
 - Staging deployada com a versão mais recente do código (o header `X-Integration-Test` é necessário para bypass do rate limit)
 
 **Executar:**
 
 ```bash
-INTEGRATION_TEST_SECRET=$(grep INTEGRATION_TEST_SECRET .env | cut -d= -f2) npm run test:integration
+INTEGRATION_TEST_SECRET=$(grep INTEGRATION_TEST_SECRET .env | cut -d= -f2) \
+EXPECTED_ORIGIN=$(grep ALLOWED_ORIGINS .env | cut -d= -f2) \
+npm run test:integration
 ```
 
 Os testes são pulados automaticamente se `INTEGRATION_TEST_SECRET` não estiver definida, evitando que forks ou contribuidores acidentalmente batam na staging.
