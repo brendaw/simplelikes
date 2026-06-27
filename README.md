@@ -168,7 +168,7 @@ simplelikes can be adapted to any JavaScript runtime that supports SQLite or HTT
 | Env var | Default | Description |
 |---|---|---|
 | `ALLOWED_ORIGINS` | `http://localhost:8787` | Comma-separated list of allowed CORS origins |
-| `D1_DATABASE_ID` | — | Cloudflare D1 database ID (auto-detected by Wrangler) |
+| `INTEGRATION_TEST_SECRET` | — | Secret for `X-Integration-Test` header to bypass rate limits in integration tests |
 
 > `ALLOWED_ORIGINS` defaults to the local Wrangler dev server. For deployed workers, override via `wrangler.toml [vars]` or Cloudflare dashboard.
 
@@ -181,7 +181,7 @@ cp .env.example .env
 cp wrangler.toml.example wrangler.toml
 ```
 
-The `wrangler.toml` uses `{env.VAR}` placeholders resolved at runtime by Wrangler. For local dev, the `.env` file provides these values — no Cloudflare account required.
+The `wrangler.toml` uses `__PLACEHOLDER__` variables (e.g. `__STAGING_DATABASE_ID__`) that are replaced with real values by `scripts/setup.sh` during local setup or by CI via `sed` during deployment. For local dev, no Cloudflare account is required — a local SQLite database is used.
 
 For Cloudflare deployment, use `npm run setup` to auto-detect databases and generate both files.
 
