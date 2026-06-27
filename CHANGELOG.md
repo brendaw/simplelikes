@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.3](https://github.com/brendaw/simplelikes/releases/tag/v0.5.3) - 2026-06-27
+
+### Fixed
+
+- Use needs.integration-tests.result instead of success() for release trigger
+
+### Changed
+
+- Segregate pipeline badges into Build, Staging, and Production
+- Decouple Build and Deploy into independent workflows
+
 ## [0.5.2](https://github.com/brendaw/simplelikes/releases/tag/v0.5.2) - 2026-06-27
 
 ### Fixed
