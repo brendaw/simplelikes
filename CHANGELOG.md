@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.2](https://github.com/brendaw/simplelikes/releases/tag/v0.5.2) - 2026-06-27
+
+### Fixed
+
+- Apply CORS after cache layer and clone response for immutable cached headers
+- Apply CORS headers after cache to handle immutable cached responses
+- Apply CORS headers outside cache layer
+
 ## [0.5.1](https://github.com/brendaw/simplelikes/releases/tag/v0.5.1) - 2026-06-27
 
 ### Fixed
