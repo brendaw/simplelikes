@@ -20,7 +20,7 @@ A minimal, standalone likes counter API. Drop-in anonymous likes for any static 
 - Rate limiting — per-IP (10 req/min) + global safeguard (500 GET/min, 50 POST/min)
 - Slug validation — prevents path traversal and abuse
 - Anonymous — no login, no user data stored
-- Portable — runs on Cloudflare Workers, Fly.io, or any Node.js host
+- Cloudflare native — runs on Cloudflare Workers + D1, no external dependencies
 - Client script included — drop-in `examples/likes.js` for any static site
 
 ## Quick start
@@ -156,10 +156,6 @@ This auto-detects your D1 databases, creates `.env` with real IDs, copies `wrang
    ```bash
    npm run deploy
    ```
-
-### Other platforms
-
-simplelikes can be adapted to any JavaScript runtime that supports SQLite or HTTP request handling.
 
 ## Configuration
 
