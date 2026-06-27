@@ -10,6 +10,7 @@ For bug reports or feature requests, [open an Issue](https://github.com/brendaw/
 - npm
 - No Cloudflare account needed for local development — a local SQLite database is used
 - Wrangler CLI (`npm install -g wrangler`) and `wrangler login` only needed for deployment
+- `better-sqlite3` (optional) — installs automatically with `npm install`; only needed for the VPS/standalone server
 
 ## How to contribute
 
@@ -96,6 +97,7 @@ The repository includes an `.editorconfig` file. Most editors support it nativel
 | `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET`) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run deploy` | Deploy to Cloudflare Workers |
+| `npm run serve` | Start standalone Node.js server (VPS / local SQLite — requires `better-sqlite3`) |
 
 `scripts/release.sh`, `scripts/changelog.sh`, and `scripts/setup.sh` are maintainer-only scripts. The setup is also available via `npm run setup` for contributors with Cloudflare access.
 

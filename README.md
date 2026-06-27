@@ -157,6 +157,36 @@ This auto-detects your D1 databases, creates `.env` with real IDs, copies `wrang
    npm run deploy
    ```
 
+### VPS / standalone (Node.js)
+
+simplelikes can also run as a standalone Node.js server using `better-sqlite3`:
+
+```bash
+npm install
+npm run serve
+```
+
+The server starts at `http://localhost:3000` with an auto-created SQLite database at `./data/likes.db`.
+
+> `better-sqlite3` is an **optional dependency** — Cloudflare Workers deploys do not install it. Only install when self-hosting.
+
+#### Configuration
+
+| Env var | Default | Description |
+|---|---|---|
+| `PORT` | `3000` | HTTP server port |
+| `DB_PATH` | `./data/likes.db` | SQLite database file path |
+| `ALLOWED_ORIGINS` | — | Comma-separated list of allowed CORS origins |
+
+#### Process management
+
+For production VPS deployments, use a process manager like `pm2`:
+
+```bash
+npm install -g pm2
+pm2 start npm --name simplelikes -- run serve
+```
+
 ## Configuration
 
 ### Environment variables
@@ -220,14 +250,20 @@ The script automatically:
 | `npm run deploy` | Deploy to Cloudflare Workers |
 | `npm run deploy:staging` | Deploy to staging environment |
 | `npm run deploy:production` | Deploy to production environment |
+| `npm run serve` | Start standalone Node.js server (VPS / local SQLite) |
 
 ## Project structure
 
 ```
 simplelikes/
 ├── src/
-│   ├── index.ts              Worker handler
-│   ├── db/schema.sql         D1 schema
+│   ├── index.ts              Workers entry point (creates D1Storage, delegates to handleRequest)
+│   ├── server.ts             Node.js/VPS entry point (creates Sqlite3Storage, HTTP server)
+│   ├── db/schema.sql         D1 / SQLite schema
+│   ├── storage/
+│   │   ├── types.ts          IStorage interface (getCount, increment, hasVisitor, batchGet)
+│   │   ├── d1.ts             D1Storage — D1Database adapter
+│   │   └── sqlite.ts         Sqlite3Storage — better-sqlite3 adapter (optional dep)
 │   └── utils/
 │       ├── cache.ts          Cloudflare Cache API wrapper (60s GET, 30s batch)
 │       ├── cors.ts           CORS whitelist + security headers

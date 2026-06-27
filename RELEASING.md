@@ -19,6 +19,7 @@ This document describes the release process for maintainers of simplelikes.
 | `npm run deploy` | Deploy to default environment |
 | `npm run deploy:staging` | Deploy to staging |
 | `npm run deploy:production` | Deploy to production |
+| `npm run serve` | Start standalone Node.js server (VPS / local SQLite) |
 | `scripts/release.sh` | Orchestrates the full release: version detection, changelog generation, commit, tag, and push |
 | `scripts/changelog.sh` | Generates CHANGELOG entries from conventional commits; run standalone to refresh [Unreleased] or during release workflow |
 | `scripts/setup.sh` | One-command setup: detects D1 databases, generates `.env`, copies config, applies schema |
