@@ -135,6 +135,34 @@ For rate limiting purposes, operations are categorized by **semantics**, not HTT
 
 This ensures the D1 write quota (100k rows/day on free tier) is protected by the stricter POST limit, while read-heavy batch operations use the more generous GET limit.
 
+### Rate limit flow
+
+The request pipeline evaluates limits in this order:
+
+1. **Input validation** — slug format (`[a-z0-9/-]`, max 200 chars), batch size (max 50), method
+2. **Global rate limit** — per-method safeguard (500 GET/min, 50 POST/min)
+3. **Per-IP rate limit** — 10 req/min per origin IP
+4. **D1 query** — actual database read or write
+5. **Caching** — batch `cache.put()` runs in background (`ctx.waitUntil`), GET cache is stored synchronously
+
+Steps 2 and 3 return `429 Too Many Requests` with `Retry-After` header. A failed step rejects the request before the next step runs.
+
+### CORS and security headers
+
+Every response includes security headers. CORS is configurable via the `ALLOWED_ORIGINS` env var:
+
+| Header | Preflight | Normal response |
+|---|---|---|
+| `Access-Control-Allow-Origin` | Request origin (if whitelisted) | Same |
+| `Access-Control-Allow-Methods` | `GET, POST, OPTIONS` | — |
+| `Access-Control-Allow-Headers` | `Content-Type, X-Visitor-Id` | — |
+| `Access-Control-Max-Age` | `86400` (24h) | — |
+| `Vary` | — | `Origin` |
+| `X-Content-Type-Options` | — | `nosniff` |
+| `X-Frame-Options` | — | `DENY` |
+
+Default allowed origins: `http://localhost:8787`. For production, set `ALLOWED_ORIGINS` to your comma-separated domains (configured via Cloudflare dashboard or CI env vars).
+
 ### Key constraints
 
 - No `PUT`, `PATCH`, or `DELETE` — the API is intentionally minimal

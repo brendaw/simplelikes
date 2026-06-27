@@ -11,7 +11,11 @@ This document describes the release process for maintainers of simplelikes.
 | `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |
 | `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |
-| `npm test` | Run test suite |
+| `npm test` | Run unit tests (Vitest) |
+| `npm run test:coverage` | Run unit tests with coverage report (threshold: 90%) |
+| `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET`) |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run changelog` | Refresh `[Unreleased]` section in CHANGELOG from conventional commits |
 | `npm run deploy` | Deploy to default environment |
 | `npm run deploy:staging` | Deploy to staging |
 | `npm run deploy:production` | Deploy to production |
