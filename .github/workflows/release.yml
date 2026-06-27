@@ -1,8 +1,6 @@
 name: Release
 
 on:
-  push:
-    tags: ["v*"]
   workflow_dispatch:
     inputs:
       tag:
@@ -14,29 +12,23 @@ permissions:
   contents: write
 
 jobs:
-  validate:
-    uses: ./.github/workflows/ci.yml
-
   release:
-    needs: validate
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref }}
+          ref: ${{ inputs.tag }}
 
       - name: Generate release notes
         id: changelog
         run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          TAG="${{ inputs.tag }}"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-
           awk -v tag="${TAG#v}" '
             $0 ~ "^## \\[" tag "\\]" { found=1; next }
             found && /^## / { exit }
             found { print }
           ' CHANGELOG.md > _release_notes.md
-
           if [ ! -s _release_notes.md ]; then
             echo "No CHANGELOG entry found for ${TAG}"
             echo "" > _release_notes.md

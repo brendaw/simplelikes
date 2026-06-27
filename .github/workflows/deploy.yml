@@ -20,13 +20,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
-    uses: ./.github/workflows/ci.yml
+  build:
+    uses: ./.github/workflows/build.yml
 
   deploy-staging:
-    needs: validate
+    needs: build
     if: >
-      github.ref_type == 'branch' ||
+      (github.event_name == 'push' && github.ref_type == 'branch') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
     runs-on: ubuntu-24.04
     environment: staging
@@ -57,9 +57,9 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
   deploy-production:
-    needs: validate
+    needs: build
     if: >
-      github.ref_type == 'tag' ||
+      (github.event_name == 'push' && github.ref_type == 'tag') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
     runs-on: ubuntu-24.04
     environment: production
@@ -86,3 +86,50 @@ jobs:
         run: npm run deploy:production
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+  integration-tests:
+    needs: [deploy-staging, deploy-production]
+    if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+    runs-on: ubuntu-24.04
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ needs.deploy-production.result }}" = "success" ]; then
+            echo "environment=production" >> "$GITHUB_OUTPUT"
+            echo "url=https://simplelikes.william-brendaw.workers.dev" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
+            echo "url=https://simplelikes-staging.william-brendaw.workers.dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          INTEGRATION_TEST_SECRET: ${{ secrets.INTEGRATION_TEST_SECRET }}
+          INTEGRATION_TEST_URL: ${{ steps.env.outputs.url }}
+
+  trigger-release:
+    needs: integration-tests
+    if: success() && needs.integration-tests.outputs.environment == 'production' && github.ref_type == 'tag'
+    permissions:
+      actions: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Trigger Release Workflow
+        run: |
+          gh workflow run release.yml \
+            -f tag=${{ github.ref_name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
