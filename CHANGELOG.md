@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0](https://github.com/brendaw/simplelikes/releases/tag/v0.5.0) - 2026-06-26
+
+### Added
+
+- Restructure deploy pipeline with integration tests and automated release trigger
+- Rename CI to Build with separate typecheck and unit-test stages
+- Increase coverage threshold from 90% to 95%
+
+### Fixed
+
+- Update compatibility_date to 2026-06-01, fix setup.sh to replace all placeholders, and correct README config docs
+
+### Changed
+
+- Add missing storage.test.ts to project tree, document VPS env setup, and fix production URLs
+- Fix outdated pipeline references across README, CONTRIBUTING, and RELEASING
+- Rewrite MAINTAINERS.md with pipeline diagram and maintenance flow
+- Update pipeline documentation and coverage threshold to 95%
+
 ## [0.4.1](https://github.com/brendaw/simplelikes/releases/tag/v0.4.1) - 2026-06-26
 
 ### Added
