@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.1](https://github.com/brendaw/simplelikes/releases/tag/v0.4.1) - 2026-06-26
+
+### Added
+
+- Add serve script and tsx dev dependency for VPS server
+- Extract shared handleRequest, add Node.js HTTP server for VPS
+- Add Sqlite3Storage implementation with better-sqlite3
+- Extract IStorage interface and D1Storage implementation
+
+### Fixed
+
+- Use pipe delimiter in sed to handle URLs in ALLOWED_ORIGINS
+
+### Changed
+
+- Add data/ to .gitignore for VPS SQLite database
+- Add D1Storage and Sqlite3Storage unit tests
+- Add VPS/standalone server documentation
+- Add missing test:watch script to README
+- Add missing scripts to RELEASING.md, document CORS and rate-limit flow in CONTRIBUTING.md
+- Remove outdated portable claim and other platforms section
+- Fix env vars table — add INTEGRATION_TEST_SECRET, remove unused D1_DATABASE_ID
+- Document caching behavior and add cache.ts to project structure
+
 ## [0.4.0](https://github.com/brendaw/simplelikes/releases/tag/v0.4.0) - 2026-06-26
 
 ### Added
