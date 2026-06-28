@@ -7,14 +7,21 @@
  *
  *   <script src="simple-likes.js"></script>
  *   <script>
- *     window.__simpleLikesApiUrl = "https://likes.yourdomain.com";
- *     window.__simpleLikesConfig = { text: "coração", "text-plural": "corações" };
+ *     window.__simpleLikesConfig = {
+ *       apiUrl: "https://likes.yourdomain.com",
+ *       text: "coração",
+ *       "text-plural": "corações",
+ *     };
  *   </script>
  *
- * Global config (window.__simpleLikesConfig) sets defaults for all tags:
- *   text, text-plural
+ * Global config (window.__simpleLikesConfig):
+ *   apiUrl       — API endpoint base URL (default: "/likes")
+ *   text         — singular label for all tags (default: "like")
+ *   text-plural  — plural label for all tags (default: text + "s")
  *
  * Priority: inline attribute > global config > hardcoded default
+ *
+ * Legacy: window.__simpleLikesApiUrl still works as fallback for apiUrl.
  *
  * Attributes:
  *   slug         — unique identifier for the likeable content (required)
@@ -37,12 +44,13 @@ function generateVisitorId() {
   return 'v' + Math.abs(hash).toString(36);
 }
 
-function getApiUrl() {
-  return window.__simpleLikesApiUrl || '/likes';
-}
-
 function getConfig() {
   return window.__simpleLikesConfig || {};
+}
+
+function getApiUrl() {
+  const cfg = getConfig();
+  return cfg.apiUrl || window.__simpleLikesApiUrl || '/likes';
 }
 
 const SL_STYLE = document.createElement('style');

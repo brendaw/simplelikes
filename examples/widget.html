@@ -75,6 +75,7 @@
 &lt;!-- Global config (fallback for tags without inline attributes) --&gt;
 &lt;script&gt;
   window.__simpleLikesConfig = {
+    apiUrl: "https://likes.yourdomain.com",
     text: "star",
     "text-plural": "stars",
   };
@@ -88,8 +89,11 @@
 simple-likes { margin: 0 4px; }</pre>
 
   <script>
-    window.__simpleLikesApiUrl = "http://localhost:8787";
-    window.__simpleLikesConfig = { text: "star", "text-plural": "stars" };
+    window.__simpleLikesConfig = {
+      apiUrl: "http://localhost:8787",
+      text: "star",
+      "text-plural": "stars",
+    };
   </script>
   <script src="simple-likes.js"></script>
 </body>

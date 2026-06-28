@@ -246,7 +246,11 @@ For Cloudflare deployment, run `npm run setup` to auto-detect databases, generat
 
 ```html
 <script src="simple-likes.js"></script>
-<script>window.__simpleLikesApiUrl = "https://likes.yourdomain.com";</script>
+<script>
+  window.__simpleLikesConfig = {
+    apiUrl: "https://likes.yourdomain.com",
+  };
+</script>
 
 <simple-likes slug="hello-world"></simple-likes>
 <simple-likes slug="my-post"></simple-likes>
@@ -265,15 +269,25 @@ When `text-plural` is omitted, it defaults to `text` + `"s"`. Singular form is u
 
 ### Global config
 
-Set defaults for all tags on the page via `window.__simpleLikesConfig`:
+All configuration is done via `window.__simpleLikesConfig`:
 
-```html
-<script>
-  window.__simpleLikesConfig = { text: "star", "text-plural": "stars" };
-</script>
+```js
+window.__simpleLikesConfig = {
+  apiUrl: "https://likes.yourdomain.com",
+  text: "star",
+  "text-plural": "stars",
+};
 ```
 
-**Priority:** inline attribute > global config > hardcoded default (`"like"` / `"likes"`).
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `apiUrl` | string | `"/likes"` | Base URL for the likes API |
+| `text` | string | `"like"` | Default singular label for all tags |
+| `text-plural` | string | `text + "s"` | Default plural label for all tags |
+
+**Priority:** inline attribute > global config > hardcoded default.
+
+> Legacy: `window.__simpleLikesApiUrl` still works as a fallback but is deprecated.
 
 ### Styling
 
