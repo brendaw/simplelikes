@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   typecheck:
-    if: ${{ !inputs.skip-typecheck }}
+    if: ${{ !inputs.skip-typecheck && !(github.event_name == 'push' && github.ref_type == 'branch' && startsWith(github.event.head_commit.message, 'chore: release v')) }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -37,7 +37,7 @@ jobs:
 
   unit-tests:
     needs: typecheck
-    if: always() && (needs.typecheck.result == 'success' || needs.typecheck.result == 'skipped')
+    if: ${{ !(github.event_name == 'push' && github.ref_type == 'branch' && startsWith(github.event.head_commit.message, 'chore: release v')) && always() && (needs.typecheck.result == 'success' || needs.typecheck.result == 'skipped') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -54,7 +54,7 @@ jobs:
 
   trigger-deploy:
     needs: unit-tests
-    if: github.event_name == 'push' && success()
+    if: ${{ !(github.event_name == 'push' && github.ref_type == 'branch' && startsWith(github.event.head_commit.message, 'chore: release v')) && github.event_name == 'push' && success() }}
     permissions:
       actions: write
     runs-on: ubuntu-24.04
