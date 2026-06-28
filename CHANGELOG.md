@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.0](https://github.com/brendaw/simplelikes/releases/tag/v1.3.0) - 2026-06-28
+
+### Added
+
+- Add minified client bundle and split release archives
+
+### Changed
+
+- Quote YAML values with colon-space to fix workflow parsing
+- Fix YAML syntax in concurrency group expression
+- Attach standalone client bundle and add security flag
+- Skip release commits on main and unify concurrency
+- Skip pipeline for release commits on main
+
 ## [1.2.0](https://github.com/brendaw/simplelikes/releases/tag/v1.2.0) - 2026-06-28
 
 ### Added
