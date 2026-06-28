@@ -231,7 +231,42 @@ For Cloudflare deployment, run `npm run setup` to auto-detect databases, generat
 
 ## Client-side usage
 
-See [`examples/likes.js`](examples/likes.js) for a ready-to-use client script.
+### Widget (custom element)
+
+The [`examples/simple-likes.js`](examples/simple-likes.js) script provides a zero-config custom element with built-in SVG rendering:
+
+```html
+<script src="simple-likes.js"></script>
+<script>window.__simpleLikesApiUrl = "https://simplelikes.william-brendaw.workers.dev";</script>
+
+<simple-likes slug="hello-world"></simple-likes>
+<simple-likes slug="my-post" data-icon="thumbs-up"></simple-likes>
+<simple-likes slug="note-1" data-icon="star"></simple-likes>
+```
+
+**Icons:** `heart` (default), `thumbs-up`, `star` — set via `data-icon`.
+
+**Customization** via CSS custom properties:
+
+```css
+simple-likes {
+  --sl-color: #9b59b6;          /* icon color (default: currentColor) */
+  --sl-color-active: #e74c3c;   /* liked state color (default: #e74c3c) */
+  --sl-size: 24px;              /* icon size (default: 20px) */
+}
+```
+
+The widget automatically:
+- Renders the SVG icon and counter
+- Batch-fetches all counts on page load in a single request
+- Handles click → POST increment → updates count + toggles icon
+- Prevents duplicates via localStorage
+
+See [`examples/widget.html`](examples/widget.html) for a live demo.
+
+### Classic API (backward compatible)
+
+The original [`examples/likes.js`](examples/likes.js) API still works:
 
 ```html
 <button class="like-btn" data-slug="hello-world">
@@ -244,11 +279,7 @@ See [`examples/likes.js`](examples/likes.js) for a ready-to-use client script.
 </script>
 ```
 
-The script automatically:
-- Loads all like counts on page load via batch endpoint
-- Increments and updates the DOM on click
-- Prevents duplicates via localStorage
-- Adds `.liked` class to already-liked buttons
+`new LikesClient({ apiUrl })` scans for `[data-slug]` elements, batch-loads counts, and wires up click handlers. This API is also exported by `simple-likes.js` — you can use either script.
 
 ## Scripts
 

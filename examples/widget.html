@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>simplelikes — widget demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      color: #333;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1rem; margin: 2rem 0 0.75rem; color: #666; }
+    p { color: #666; margin-bottom: 2rem; }
+    .demo-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding: 1rem;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    .demo-row label {
+      font-size: 0.85rem;
+      color: #999;
+      min-width: 70px;
+    }
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.85rem;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+    .custom-theme {
+      --sl-color: #9b59b6;
+      --sl-color-active: #8e44ad;
+      --sl-size: 24px;
+    }
+    .large-theme {
+      --sl-color: #2ecc71;
+      --sl-color-active: #27ae60;
+      --sl-size: 32px;
+    }
+  </style>
+</head>
+<body>
+  <h1>simplelikes widget</h1>
+  <p>Drop-in like buttons for your static site. No build step needed.</p>
+
+  <h2>Heart (default)</h2>
+  <div class="demo-row">
+    <label>Default:</label>
+    <simple-likes slug="demo-heart"></simple-likes>
+  </div>
+  <div class="demo-row">
+    <label>Custom purple:</label>
+    <simple-likes slug="demo-heart-custom" class="custom-theme"></simple-likes>
+  </div>
+  <div class="demo-row">
+    <label>Large green:</label>
+    <simple-likes slug="demo-heart-large" class="large-theme"></simple-likes>
+  </div>
+
+  <h2>Thumbs-up</h2>
+  <div class="demo-row">
+    <label>Default:</label>
+    <simple-likes slug="demo-thumbs" data-icon="thumbs-up"></simple-likes>
+  </div>
+  <div class="demo-row">
+    <label>Custom purple:</label>
+    <simple-likes slug="demo-thumbs-custom" data-icon="thumbs-up" class="custom-theme"></simple-likes>
+  </div>
+
+  <h2>Star</h2>
+  <div class="demo-row">
+    <label>Default:</label>
+    <simple-likes slug="demo-star" data-icon="star"></simple-likes>
+  </div>
+  <div class="demo-row">
+    <label>Custom purple:</label>
+    <simple-likes slug="demo-star-custom" data-icon="star" class="custom-theme"></simple-likes>
+  </div>
+
+  <h2>Usage</h2>
+  <pre>&lt;simple-likes slug="my-post"&gt;&lt;/simple-likes&gt;
+
+&lt;simple-likes slug="my-post" data-icon="thumbs-up"&gt;&lt;/simple-likes&gt;
+
+&lt;simple-likes slug="my-post" data-icon="star" class="custom"&gt;&lt;/simple-likes&gt;
+
+&lt;script src="simple-likes.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  window.__simpleLikesApiUrl = "https://simplelikes.william-brendaw.workers.dev";
+&lt;/script&gt;</pre>
+
+  <h2>Customization</h2>
+  <pre>&lt;style&gt;
+  simple-likes {
+    --sl-color: #9b59b6;        /* default: currentColor */
+    --sl-color-active: #8e44ad;  /* default: #e74c3c */
+    --sl-size: 24px;             /* default: 20px */
+  }
+&lt;/style&gt;</pre>
+
+  <h2>Classic API (backward compatible)</h2>
+  <div class="demo-row">
+    <button data-slug="demo-classic">
+      <span data-counter>0</span> likes
+    </button>
+  </div>
+
+  <script>
+    window.__simpleLikesApiUrl = "http://localhost:8787";
+  </script>
+  <script src="simple-likes.js"></script>
+  <script>
+    new LikesClient({ apiUrl: "http://localhost:8787" });
+  </script>
+</body>
+</html>
