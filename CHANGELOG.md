@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0](https://github.com/brendaw/simplelikes/releases/tag/v1.2.0) - 2026-06-28
+
+### Added
+
+- Add unit tests and test:client script
+
+### Changed
+
+- Build client bundle and include in release archive
+- Update file tree and build output description
+- Output bundle to examples/ and update widget.html reference
+- Restructure into tests/unit/ and tests/e2e/
+- Organize tests to mirror src/ structure
+- Split client web component into modular TypeScript source
+
 ## [1.1.2](https://github.com/brendaw/simplelikes/releases/tag/v1.1.2) - 2026-06-28
 
 ### Changed
