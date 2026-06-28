@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.4](https://github.com/brendaw/simplelikes/releases/tag/v0.6.4) - 2026-06-27
+
+### Fixed
+
+- Create scripts dir in distribution archive before copying
+- Make distribution archive resilient to missing files in older tags
+
+### Changed
+
+- Update CI/CD pipeline and secret references in MAINTAINERS.md and RELEASING.md
+- Update pipeline flow and workflow triggers in MAINTAINERS.md and RELEASING.md
+- Move integration test URLs to GitHub Secrets
+- Gate trigger-release behind integration tests on production
+
 ## [0.6.3](https://github.com/brendaw/simplelikes/releases/tag/v0.6.3) - 2026-06-27
 
 ### Changed
