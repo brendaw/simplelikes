@@ -97,7 +97,7 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
 - **Trigger manual:** `workflow_dispatch` com input `environment` (staging/production)
 - **Estágios:** Deploy → Integration tests → (se produção + tag) Trigger Release
 - **Integration tests:** rodam automaticamente contra a URL do ambiente deployado, usando `INTEGRATION_TEST_SECRET` para bypass do rate limit e `EXPECTED_ORIGIN` via `ALLOWED_ORIGINS` para validação CORS
-- **Release trigger:** apenas em produção com tag — checa `integration-tests.result == 'success'` + `github.ref_type == 'tag'` — `gh workflow run release.yml` com `GITHUB_TOKEN`
+- **Release trigger:** apenas em produção com tag — `always() && needs.integration-tests.result == 'success' && github.event.inputs.environment == 'production'` — `gh workflow run release.yml` com `GITHUB_TOKEN`. O `always()` é necessário porque o GitHub Actions faz auto-skip transitivo: como `integration-tests` depende de `deploy-staging` (skipped em produção), o `trigger-release` sem `always()` era pulado antes mesmo de avaliar o `if:`
 
 ### Release
 
@@ -111,8 +111,8 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
 2. Execute `./scripts/release.sh` localmente (cria tag e faz push)
 3. O push da tag dispara o pipeline automaticamente: **Build → Deploy production → Integration tests → Release**
 4. Build executa Typecheck → Unit tests → dispara Deploy
-5. Deploy executa Deploy production → Integration tests → trigger-release
-6. trigger-release só roda se os testes integrados passarem no ambiente de produção
+5. Deploy executa Deploy production → Integration tests → trigger-release (com `always()` para bypass do skip transitivo)
+6. `trigger-release` só roda se `integration-tests` passou E `environment == 'production'`
 7. Release gera a GitHub Release com o zip de distribuição anexado
 
 ### Reprocessamento manual
