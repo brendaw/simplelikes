@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.0](https://github.com/brendaw/simplelikes/releases/tag/v1.0.0) - 2026-06-28
+
+### Added
+
+- Add X-Version header injected from git tag/sha via wrangler vars
+- Implement like/unlike toggle with atomic decrement, update docs
+- Implement like/unlike toggle with atomic decrement
+- Add like button widget and fix dev CORS for common localhost ports
+- Add like button widget and widen dev CORS defaults to common localhost ports
+- Add like button widget with SVG icons and custom element
+
+### Changed
+
+- Deduplicate scripts table, add error feedback to widget
+- Fix toggle description, curl example, privacy hash, and quick start setup
+- Add privacy policy (PRIVACY.md) and widget data disclosure
+- Replace personal hosts/URLs with generic placeholders
+- Add default badge styling to simple-likes button
+
 ## [0.6.10](https://github.com/brendaw/simplelikes/releases/tag/v0.6.10) - 2026-06-27
 
 ### Changed
