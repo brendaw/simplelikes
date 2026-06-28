@@ -21,6 +21,16 @@ jobs:
         with:
           ref: ${{ inputs.tag }}
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build client bundle
+        run: npm run build:client
+
       - name: Get tag
         id: tag
         run: |
@@ -48,6 +58,7 @@ jobs:
           mkdir -p "${DIST}/src" "${DIST}/examples" "${DIST}/scripts"
           cp -r src/ "${DIST}/src/"
           cp -r examples/ "${DIST}/examples/"
+          cp dist/simple-likes.js "${DIST}/"
           cp package.json "${DIST}/"
           cp tsconfig.json "${DIST}/"
           cp wrangler.toml.example "${DIST}/"
