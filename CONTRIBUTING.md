@@ -68,7 +68,9 @@ For bug reports or feature requests, [open an Issue](https://github.com/brendaw/
     npx vitest run test/examples.test.ts
     ```
 
- 7. Open a Pull Request against `main` describing what changed and why.
+ 7. Update any documentation that became outdated with your changes — this includes inline code comments, JSDoc, README sections, or example files. If the change introduces or modifies a user-facing feature, ensure the corresponding docs reflect it.
+
+ 8. Open a Pull Request against `main` describing what changed and why.
 
 You do not need to bump versions or update CHANGELOG.md — versioning and releases are handled by the maintainer after the PR is merged.
 

@@ -252,11 +252,30 @@ For Cloudflare deployment, run `npm run setup` to auto-detect databases, generat
 <simple-likes slug="my-post"></simple-likes>
 ```
 
-Each element renders a "N likes" button. The script automatically:
-- Batch-fetches all counts on page load via a single request
-- Toggles the like via POST on click
-- Prevents duplicates via localStorage
-- Adds a `.liked` class to already-liked buttons (style it via CSS)
+### Custom text
+
+Customize the button label with `text` (singular) and `text-plural` attributes:
+
+```html
+<simple-likes slug="pt" text="coração" text-plural="corações"></simple-likes>
+<simple-likes slug="clap" text="clap"></simple-likes>
+```
+
+When `text-plural` is omitted, it defaults to `text` + `"s"`. Singular form is used when count equals 1, plural otherwise.
+
+### Global config
+
+Set defaults for all tags on the page via `window.__simpleLikesConfig`:
+
+```html
+<script>
+  window.__simpleLikesConfig = { text: "star", "text-plural": "stars" };
+</script>
+```
+
+**Priority:** inline attribute > global config > hardcoded default (`"like"` / `"likes"`).
+
+### Styling
 
 ```css
 .sl-btn.liked { color: #e74c3c; }
