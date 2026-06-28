@@ -22,7 +22,7 @@ A minimal, standalone likes counter API. Drop-in anonymous likes for any static 
 - Slug validation — prevents path traversal and abuse
 - Anonymous — no login, no user data stored ([privacy policy](PRIVACY.md))
 - Cloudflare native — runs on Cloudflare Workers + D1, no external dependencies
-- Client script included — drop-in `<simple-likes>` custom element in `examples/simple-likes.js`
+- Client script included — drop-in `<simple-likes>` custom element in `dist/simple-likes.js`
 
 ## Quick start
 
@@ -242,10 +242,16 @@ For Cloudflare deployment, run `npm run setup` to auto-detect databases, generat
 
 ## Client-side usage
 
-[`examples/simple-likes.js`](examples/simple-likes.js) provides a `<simple-likes>` custom element for anonymous likes on any static site:
+The web component source is in `src/client/` (TypeScript). Build the bundle:
+
+```bash
+npm run build:client
+```
+
+This produces `dist/simple-likes.js` — a single-file drop-in script.
 
 ```html
-<script src="simple-likes.js"></script>
+<script src="dist/simple-likes.js"></script>
 <script>
   window.__simpleLikesConfig = {
     apiUrl: "https://likes.yourdomain.com",
@@ -337,8 +343,10 @@ simplelikes/
 │       ├── cors.ts           CORS whitelist + security headers
 │       ├── rate-limit.ts     Per-IP + global rate limiting
 │       └── validate.ts       Slug validation
+├── dist/
+│   └── simple-likes.js       Built client bundle
 ├── examples/
-│   └── simple-likes.js       Client-side custom element
+│   └── widget.html           Live demo
 ├── vitest.config.ts          Vitest config (coverage, thresholds)
 ├── test/
 │   ├── cache.test.ts             Unit: Cache API wrap + batchKey

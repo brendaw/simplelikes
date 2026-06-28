@@ -62,13 +62,19 @@ For bug reports or feature requests, [open an Issue](https://github.com/brendaw/
 
     The project requires **≥95% coverage** (statements, branches, functions, lines). New features must include tests that cover the new code.
 
-    If you changed the client-side web component (`examples/simple-likes.js`), also run the web component tests:
+    If you changed the client-side web component (`src/client/`), also run the web component tests:
 
     ```bash
     npx vitest run test/examples.test.ts
     ```
 
- 7. Update any documentation that became outdated with your changes — this includes inline code comments, JSDoc, README sections, or example files. If the change introduces or modifies a user-facing feature, ensure the corresponding docs reflect it.
+ 7. Update any documentation that became outdated with your changes — this includes inline code comments, JSDoc, README sections, or example files. If you changed the client component, rebuild the bundle:
+
+    ```bash
+    npm run build:client
+    ```
+
+    If the change introduces or modifies a user-facing feature, ensure the corresponding docs reflect it.
 
  8. Open a Pull Request against `main` describing what changed and why.
 
@@ -86,7 +92,7 @@ npm run test:coverage
 
 ### Client-side tests
 
-The web component in `examples/simple-likes.js` has its own test suite in `test/examples.test.ts` using `happy-dom` for DOM emulation. If you modify the component, add or update tests in that file.
+The web component in `src/client/` (TypeScript source, bundled to `dist/simple-likes.js`) has its own test suite in `test/examples.test.ts` using `happy-dom` for DOM emulation. If you modify the component, add or update tests in that file.
 
 ### Before submitting
 
