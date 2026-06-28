@@ -22,7 +22,7 @@ A minimal, standalone likes counter API. Drop-in anonymous likes for any static 
 - Slug validation — prevents path traversal and abuse
 - Anonymous — no login, no user data stored
 - Cloudflare native — runs on Cloudflare Workers + D1, no external dependencies
-- Client script included — drop-in `examples/likes.js` for any static site
+- Client script included — drop-in `<simple-likes>` custom element in `examples/simple-likes.js`
 
 ## Quick start
 
@@ -55,10 +55,10 @@ Returns the current like count for a slug.
 
 ### POST /likes/:slug
 
-Increments the count and records the visitor. Requires `X-Visitor-Id` header (a hash of User-Agent + IP, generated client-side). Returns `alreadyLiked: true` if the visitor already liked this slug.
+Toggles the like for a visitor. Requires `X-Visitor-Id` header (a hash of User-Agent + IP, generated client-side). If the visitor hasn't liked this slug yet, it increments the count. If they already liked it, it decrements and removes their visitor record. Returns `liked: true` after a like, `liked: false` after an unlike.
 
 ```json
-{"slug":"hello-world","count":43,"alreadyLiked":false}
+{"slug":"hello-world","count":43,"liked":true}
 ```
 
 ### POST /likes/batch
@@ -293,7 +293,7 @@ simplelikes/
 │       ├── rate-limit.ts     Per-IP + global rate limiting
 │       └── validate.ts       Slug validation
 ├── examples/
-│   └── likes.js              Client-side integration example
+│   └── simple-likes.js       Client-side custom element
 ├── vitest.config.ts          Vitest config (coverage, thresholds)
 ├── test/
 │   ├── cache.test.ts             Unit: Cache API wrap + batchKey

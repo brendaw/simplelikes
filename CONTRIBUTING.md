@@ -89,6 +89,8 @@ The repository includes an `.editorconfig` file. Most editors support it nativel
 |---|---|
 | `npm run dev` | Start local dev server (loads `.env` automatically) |
 | `npm run dev:stop` | Stop local dev server |
+| `npm run dev:clean` | Remove `.wrangler/` (local D1 data and caches) |
+| `npm run dev:setup` | Apply schema to local D1 database (run after `dev:clean` or on first start) |
 | `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |
 | `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |
@@ -112,7 +114,7 @@ simplelikes follows a pragmatic REST approach. Understanding these conventions h
 | Method | When to use | Examples |
 |---|---|---|
 | `GET` | Single resource reads — no body, no side effects | `GET /likes/:slug` |
-| `POST` | State-changing operations (writes) | `POST /likes/:slug` (increment) |
+| `POST` | State-changing operations (writes) | `POST /likes/:slug` (toggle) |
 | `POST` (for-read) | Batch reads requiring a body — RFC 9110 §9.3.1 discourages `GET` with body | `POST /likes/batch` |
 
 ### Why POST for batch reads?
