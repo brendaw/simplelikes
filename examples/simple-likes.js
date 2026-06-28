@@ -27,6 +27,14 @@ function getApiUrl() {
   return window.__simpleLikesApiUrl || 'https://simplelikes.william-brendaw.workers.dev';
 }
 
+const SL_STYLE = document.createElement('style');
+SL_STYLE.textContent =
+  '.sl-btn{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border:1px solid #d0d0d0;border-radius:12px;background:#fafafa;font:inherit;font-size:0.85em;cursor:pointer;color:#666;transition:all .15s;line-height:1.6}' +
+  '.sl-btn:hover{background:#f0f0f0;border-color:#bbb}' +
+  '.sl-btn.liked{background:#fff0f0;border-color:#e74c3c;color:#e74c3c}' +
+  '.sl-btn.liked:hover{background:#ffe0e0}';
+document.head.appendChild(SL_STYLE);
+
 class SimpleLikes extends HTMLElement {
   static observedAttributes = ['slug'];
 
