@@ -5,7 +5,7 @@
  *   <simple-likes slug="hello-world"></simple-likes>
  *
  *   <script src="simple-likes.js"></script>
- *   <script>window.__simpleLikesApiUrl = "https://simplelikes.william-brendaw.workers.dev";</script>
+ *   <script>window.__simpleLikesApiUrl = "https://likes.yourdomain.com";</script>
  *
  * The element renders a "N likes" button that:
  *   - Batch-fetches all counts on page load
@@ -24,7 +24,7 @@ function generateVisitorId() {
 }
 
 function getApiUrl() {
-  return window.__simpleLikesApiUrl || 'https://simplelikes.william-brendaw.workers.dev';
+  return window.__simpleLikesApiUrl || '/likes';
 }
 
 const SL_STYLE = document.createElement('style');

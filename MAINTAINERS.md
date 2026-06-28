@@ -6,7 +6,7 @@ Este documento define as bases de manutenção do simplelikes.
 
 | Nome | GitHub | Contato |
 |---|---|---|
-| William Brendaw | [@brendaw](https://github.com/brendaw) | williambrendaw.com |
+| William Brendaw | [@brendaw](https://github.com/brendaw) | — |
 
 Atualmente sou o único maintainer do projeto. Todo o fluxo de contribuição passa por mim até que novos maintainers sejam nomeados.
 
@@ -154,7 +154,7 @@ Rodam automaticamente no pipeline Deploy após o deploy, contra a URL do ambient
 **Pré-requisitos:**
 
 - `INTEGRATION_TEST_SECRET` configurado no `.env` (mesmo valor do GitHub Secret)
-- `EXPECTED_ORIGIN` configurado no `.env` (valor do `ALLOWED_ORIGINS` do ambiente — ex: `https://williambrendaw.com`)
+- `EXPECTED_ORIGIN` configurado no `.env` (valor do `ALLOWED_ORIGINS` do ambiente — ex: `https://meusite.com`)
 - Staging deployada com a versão mais recente do código (o header `X-Integration-Test` é necessário para bypass do rate limit)
 
 **Executar:**

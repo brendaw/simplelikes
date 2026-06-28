@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 
-const BASE_URL = process.env.INTEGRATION_TEST_URL || "https://simplelikes-staging.william-brendaw.workers.dev";
+const BASE_URL = process.env.INTEGRATION_TEST_URL || "https://staging.likes.yourdomain.com";
 const SECRET = process.env.INTEGRATION_TEST_SECRET;
 const EXPECTED_ORIGIN = process.env.EXPECTED_ORIGIN;
 

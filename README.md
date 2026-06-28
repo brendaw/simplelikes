@@ -71,7 +71,7 @@ Returns counts for multiple slugs in a single request. A batch **read** operatio
 - **Sidebar widgets** — "most liked" or "trending" widgets that need counts for multiple slugs
 
 ```bash
-curl -X POST https://simplelikes.william-brendaw.workers.dev/likes/batch \
+curl -X POST https://likes.yourdomain.com/likes/batch \
   -H "Content-Type: application/json" \
   -d '{"slugs":["hello-world","my-post","note-1"]}'
 ```
@@ -235,7 +235,7 @@ For Cloudflare deployment, run `npm run setup` to auto-detect databases, generat
 
 ```html
 <script src="simple-likes.js"></script>
-<script>window.__simpleLikesApiUrl = "https://simplelikes.william-brendaw.workers.dev";</script>
+<script>window.__simpleLikesApiUrl = "https://likes.yourdomain.com";</script>
 
 <simple-likes slug="hello-world"></simple-likes>
 <simple-likes slug="my-post"></simple-likes>
