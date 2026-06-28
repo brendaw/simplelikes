@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.1](https://github.com/brendaw/simplelikes/releases/tag/v1.1.1) - 2026-06-28
+
+### Fixed
+
+- Remove stray quote in release.sh causing syntax error
+
 ## [1.1.0](https://github.com/brendaw/simplelikes/releases/tag/v1.1.0) - 2026-06-28
 
 ### Added
