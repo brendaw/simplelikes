@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.8](https://github.com/brendaw/simplelikes/releases/tag/v0.6.8) - 2026-06-27
+
+### Changed
+
+- Add checkout step to trigger-release job for gh CLI
+
 ## [0.6.7](https://github.com/brendaw/simplelikes/releases/tag/v0.6.7) - 2026-06-27
 
 ### Changed
