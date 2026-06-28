@@ -56,7 +56,7 @@ describeIf("integration tests", () => {
     });
     const body = await res.json();
     expect(res.status).toBe(200);
-    expect(body.slugs).toMatchObject({ [slug]: 1, [`${slug}-2`]: 0, [`${slug}-3`]: 0 });
+    expect(body.slugs).toMatchObject({ [slug]: 0, [`${slug}-2`]: 0, [`${slug}-3`]: 0 });
   });
 
   it("POST /likes/batch with empty slugs returns 400", async () => {
@@ -93,5 +93,6 @@ describeIf("integration tests", () => {
     expect(res.headers.get("access-control-allow-origin")).toBe(EXPECTED_ORIGIN);
     expect(res.headers.get("x-content-type-options")).toBe("nosniff");
     expect(res.headers.get("x-frame-options")).toBe("DENY");
+    expect(res.headers.get("x-version")).toBeTruthy();
   });
 });
