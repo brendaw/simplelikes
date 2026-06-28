@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.2](https://github.com/brendaw/simplelikes/releases/tag/v1.0.2) - 2026-06-28
+
+### Changed
+
+- Fix batch integration test expectation after toggle behavior
+
 ## [1.0.1](https://github.com/brendaw/simplelikes/releases/tag/v1.0.1) - 2026-06-28
 
 ### Changed
