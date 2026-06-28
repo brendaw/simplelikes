@@ -29,7 +29,7 @@ describe("cache", () => {
 
   describe("wrap", () => {
     it("returns cached response on cache hit", async () => {
-      const { createCache } = await import("../../src/utils/cache");
+      const { createCache } = await import("../../../src/utils/cache");
       const cache = createCache(mockCtx);
 
       const expected = new Response(JSON.stringify({ cached: true }));
@@ -44,7 +44,7 @@ describe("cache", () => {
     });
 
     it("calls fetchFn on cache miss and stores response", async () => {
-      const { createCache } = await import("../../src/utils/cache");
+      const { createCache } = await import("../../../src/utils/cache");
       const cache = createCache(mockCtx);
 
       const req = new Request("http://test/miss");
@@ -62,7 +62,7 @@ describe("cache", () => {
     });
 
     it("does not cache non-200 responses", async () => {
-      const { createCache } = await import("../../src/utils/cache");
+      const { createCache } = await import("../../../src/utils/cache");
       const cache = createCache(mockCtx);
 
       const req = new Request("http://test/error");
@@ -73,7 +73,7 @@ describe("cache", () => {
     });
 
     it("uses custom key when provided", async () => {
-      const { createCache } = await import("../../src/utils/cache");
+      const { createCache } = await import("../../../src/utils/cache");
       const cache = createCache(mockCtx);
 
       const req = new Request("http://test/any");
@@ -90,7 +90,7 @@ describe("cache", () => {
       vi.stubGlobal("caches", undefined);
       vi.resetModules();
 
-      const { createCache } = await import("../../src/utils/cache");
+      const { createCache } = await import("../../../src/utils/cache");
       const cache = createCache(mockCtx);
 
       const req = new Request("http://test/skip");
@@ -106,7 +106,7 @@ describe("cache", () => {
 
   describe("batchKey", () => {
     it("generates deterministic key from sorted slugs", async () => {
-      const { createCache } = await import("../../src/utils/cache");
+      const { createCache } = await import("../../../src/utils/cache");
       const cache = createCache(mockCtx);
 
       const key1 = await cache.batchKey(["z", "a", "m"]);
@@ -118,7 +118,7 @@ describe("cache", () => {
     });
 
     it("generates different keys for different slug sets", async () => {
-      const { createCache } = await import("../../src/utils/cache");
+      const { createCache } = await import("../../../src/utils/cache");
       const cache = createCache(mockCtx);
 
       const keyA = await cache.batchKey(["a", "b"]);

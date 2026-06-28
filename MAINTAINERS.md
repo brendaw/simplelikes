@@ -147,7 +147,7 @@ Os seguintes segredos devem estar configurados no repositório para o CI/CD func
 
 ## Testes de integração
 
-Os testes de integração em `test/integration.test.ts` batem contra o ambiente staging ou production real. A URL de cada ambiente é carregada dos GitHub Secrets `INTEGRATION_TEST_URL_STAGING` e `INTEGRATION_TEST_URL_PRODUCTION`.
+Os testes de integração em `tests/e2e/integration.test.ts` batem contra o ambiente staging ou production real. A URL de cada ambiente é carregada dos GitHub Secrets `INTEGRATION_TEST_URL_STAGING` e `INTEGRATION_TEST_URL_PRODUCTION`.
 
 ### No CI
 

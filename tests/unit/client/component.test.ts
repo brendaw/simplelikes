@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 function importComponent() {
-  return import("../../src/client/index.js");
+  return import("../../../src/client/index.js");
 }
 
 describe("SimpleLikes web component", () => {

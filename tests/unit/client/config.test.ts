@@ -5,7 +5,7 @@ import {
   resolveApiUrl,
   resolveText,
   resolveTextPlural,
-} from "../../src/client/config.js";
+} from "../../../src/client/config.js";
 
 describe("getConfig", () => {
   beforeEach(() => {

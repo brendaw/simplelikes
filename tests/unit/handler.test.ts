@@ -18,7 +18,7 @@ function createMockStmt() {
 }
 
 function createHandler() {
-  return import("../src/index").then((m) => m.default);
+  return import("../../src/index").then((m) => m.default);
 }
 
 describe("handler", () => {

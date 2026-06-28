@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { getCount, batchGet, toggleLike } from "../../src/client/api.js";
+import { getCount, batchGet, toggleLike } from "../../../src/client/api.js";
 
 const mockFetch = vi.fn();
 

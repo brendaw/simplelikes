@@ -348,7 +348,7 @@ simplelikes/
 ├── examples/
 │   └── widget.html           Live demo
 ├── vitest.config.ts          Vitest config (coverage, thresholds)
-├── test/
+├── tests/
 │   ├── cache.test.ts             Unit: Cache API wrap + batchKey
 │   ├── cors.test.ts              Unit: CORS whitelist + security headers
 │   ├── handler.test.ts           Unit: full request routing with mocked D1

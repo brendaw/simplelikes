@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 
 describe("cors", () => {
   it("create defaults to common localhost ports", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create();
 
     const req8787 = new Request("http://localhost/test", {
@@ -23,7 +23,7 @@ describe("cors", () => {
   });
 
   it("create accepts a single origin", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create("https://mysite.com");
 
     const req = new Request("http://localhost/test", {
@@ -34,7 +34,7 @@ describe("cors", () => {
   });
 
   it("create accepts custom allowed origins", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create("https://site1.com,https://site2.com");
 
     const req1 = new Request("http://localhost/test", {
@@ -51,7 +51,7 @@ describe("cors", () => {
   });
 
   it("handlePreflight returns 204 without CORS for unknown origin", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create("https://allowed.com");
 
     const req = new Request("http://localhost/test", {
@@ -63,7 +63,7 @@ describe("cors", () => {
   });
 
   it("handlePreflight returns 204 without CORS for no origin", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create();
 
     const req = new Request("http://localhost/test");
@@ -73,7 +73,7 @@ describe("cors", () => {
   });
 
   it("handlePreflight returns CORS headers for allowed origin", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create("https://allowed.com");
 
     const req = new Request("http://localhost/test", {
@@ -88,7 +88,7 @@ describe("cors", () => {
   });
 
   it("wrap adds security headers to any response", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create();
 
     const req = new Request("http://localhost/test");
@@ -98,7 +98,7 @@ describe("cors", () => {
   });
 
   it("wrap adds CORS header when origin matches", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create("https://allowed.com");
 
     const req = new Request("http://localhost/test", {
@@ -110,7 +110,7 @@ describe("cors", () => {
   });
 
   it("wrap does not add CORS header when origin does not match", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create("https://allowed.com");
 
     const req = new Request("http://localhost/test", {
@@ -122,7 +122,7 @@ describe("cors", () => {
   });
 
   it("create with version adds X-Version to preflight response", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create("https://mysite.com", "v1.0.0");
 
     const req = new Request("http://localhost/test", {
@@ -133,7 +133,7 @@ describe("cors", () => {
   });
 
   it("create with version adds X-Version to wrapped response", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create(undefined, "v2.0.0");
 
     const res = c.wrap(new Response("ok"), new Request("http://localhost/test"));
@@ -141,7 +141,7 @@ describe("cors", () => {
   });
 
   it("create without version omits X-Version header", async () => {
-    const { cors } = await import("../../src/utils/cors");
+    const { cors } = await import("../../../src/utils/cors");
     const c = cors.create();
 
     const req = new Request("http://localhost/test", {

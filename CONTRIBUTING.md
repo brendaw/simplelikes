@@ -65,7 +65,7 @@ For bug reports or feature requests, [open an Issue](https://github.com/brendaw/
     If you changed the client-side web component (`src/client/`), also run the web component tests:
 
     ```bash
-    npx vitest run test/examples.test.ts
+    npx vitest run tests/unit/client/
     ```
 
  7. Update any documentation that became outdated with your changes — this includes inline code comments, JSDoc, README sections, or example files. If you changed the client component, rebuild the bundle:
@@ -92,7 +92,7 @@ npm run test:coverage
 
 ### Client-side tests
 
-The web component in `src/client/` (TypeScript source, bundled to `dist/simple-likes.js`) has its own test suite in `test/examples.test.ts` using `happy-dom` for DOM emulation. If you modify the component, add or update tests in that file.
+The web component in `src/client/` (TypeScript source, bundled to `dist/simple-likes.js`) has its own test suite in `tests/unit/client/` using `happy-dom` for DOM emulation. If you modify the component, add or update tests in that directory.
 
 ### Before submitting
 
@@ -101,7 +101,7 @@ Run a full local check to make sure nothing is broken:
 ```bash
 npm run typecheck
 npm run test:coverage       # backend unit tests + coverage
-npx vitest run test/examples.test.ts  # web component tests
+npx vitest run tests/unit/client/  # web component tests
 ```
 
 Integration tests are optional for contributors (requires `INTEGRATION_TEST_SECRET`) and are run automatically in CI after deployment.
