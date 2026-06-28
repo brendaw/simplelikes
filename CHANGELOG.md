@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.1](https://github.com/brendaw/simplelikes/releases/tag/v1.3.1) - 2026-06-28
+
+### Changed
+
+- Rename simple-likes.js to simplelikes.js and fix release archive paths
+
 ## [1.3.0](https://github.com/brendaw/simplelikes/releases/tag/v1.3.0) - 2026-06-28
 
 ### Added
