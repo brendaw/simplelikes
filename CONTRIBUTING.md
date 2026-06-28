@@ -48,15 +48,55 @@ For bug reports or feature requests, [open an Issue](https://github.com/brendaw/
 
 5. Make your changes in `src/`.
 
-6. Run type check and tests before opening a PR:
+ 6. Run type check and tests before opening a PR:
 
-   ```bash
-   npm run typecheck && npm test
-   ```
+    ```bash
+    npm run typecheck && npm test
+    ```
 
-7. Open a Pull Request against `main` describing what changed and why.
+    If you made changes to backend code (`src/`), verify coverage is maintained:
+
+    ```bash
+    npm run test:coverage
+    ```
+
+    The project requires **≥95% coverage** (statements, branches, functions, lines). New features must include tests that cover the new code.
+
+    If you changed the client-side web component (`examples/simple-likes.js`), also run the web component tests:
+
+    ```bash
+    npx vitest run test/examples.test.ts
+    ```
+
+ 7. Open a Pull Request against `main` describing what changed and why.
 
 You do not need to bump versions or update CHANGELOG.md — versioning and releases are handled by the maintainer after the PR is merged.
+
+## Testing expectations
+
+### Code coverage
+
+The project enforces **≥95% coverage** on `src/` (backend). The CI pipeline breaks if coverage drops below the threshold. Always check:
+
+```bash
+npm run test:coverage
+```
+
+### Client-side tests
+
+The web component in `examples/simple-likes.js` has its own test suite in `test/examples.test.ts` using `happy-dom` for DOM emulation. If you modify the component, add or update tests in that file.
+
+### Before submitting
+
+Run a full local check to make sure nothing is broken:
+
+```bash
+npm run typecheck
+npm run test:coverage       # backend unit tests + coverage
+npx vitest run test/examples.test.ts  # web component tests
+```
+
+Integration tests are optional for contributors (requires `INTEGRATION_TEST_SECRET`) and are run automatically in CI after deployment.
 
 ## Commit messages
 
