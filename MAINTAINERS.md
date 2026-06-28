@@ -108,12 +108,16 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
 ### Fluxo de release completo
 
 1. Desenvolva e faça merge dos PRs em `main`
-2. Execute `./scripts/release.sh` localmente (cria tag e faz push)
-3. O push da tag dispara o pipeline automaticamente: **Build → Deploy production → Integration tests → Release**
-4. Build executa Typecheck → Unit tests → dispara Deploy
-5. Deploy executa Deploy production → Integration tests → trigger-release (com `always()` para bypass do skip transitivo)
-6. `trigger-release` só roda se `integration-tests` passou E `environment == 'production'`
-7. Release gera a GitHub Release com o zip de distribuição anexado
+2. Execute `./scripts/release.sh` localmente:
+   - Gera CHANGELOG, commita e faz **push da main** (dispara staging)
+   - Cria a tag localmente
+   - **Aguarda confirmação** antes de empurrar a tag
+3. Acompanhe o staging CI em **Actions**: Build → Deploy staging → Integration tests
+4. Só depois do staging verde, confirme o push da tag:
+   ```bash
+   git push origin v0.7.0
+   ```
+5. O push da tag dispara: **Build → Deploy production → Integration tests → Release**
 
 ### Reprocessamento manual
 

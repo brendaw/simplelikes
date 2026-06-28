@@ -63,7 +63,7 @@ Releases follow [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`)
 
 ### Using release.sh (recommended)
 
-Run `scripts/release.sh` to automate the entire flow:
+Run `scripts/release.sh` to automate the release:
 
 ```bash
 ./scripts/release.sh           # suggests next version from commit history
@@ -78,28 +78,30 @@ The script will:
 4. Show a diff of the changes for review
 5. Ask for a final confirmation
 6. Optionally, list open issues and prompt which ones to close — adds `Closes #N` to the commit message and closes them via `gh issue close`
-7. Commit the CHANGELOG, push `main`, and push the tag — triggering the Deploy pipeline
+7. Commit the CHANGELOG and **push only `main`** (triggers staging deploy)
+8. **Wait** for staging CI to pass (Build → Deploy staging → Integration tests)
+9. Confirm when prompted — the script pushes the tag, triggering production deploy
 
-The Deploy pipeline will build, deploy to production, run integration tests, and trigger the Release pipeline to create the GitHub Release with changelog notes attached.
+> The tag is created locally in step 2 and moved to the release commit. It is **not pushed** until you confirm in step 9. This guarantees that staging validates before production runs.
 
 ### Manual steps (without release.sh)
 
 If you need to run the steps individually:
 
-1. Create the tag locally:
-
-   ```bash
-   git tag v0.1.0
-   ```
-
-2. Push `main` and then the tag:
+1. Commit and push `main` (this triggers the staging pipeline):
 
    ```bash
    git push origin main
-   git push origin v0.1.0
    ```
 
-The key constraint: `main` must be pushed before the tag, so the workflow checks out the correct state.
+2. Wait for staging CI to pass — **Actions → Build → Deploy staging → Integration tests**
+
+3. Create and push the tag only after staging is green:
+
+   ```bash
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```
 
 ## Keeping [Unreleased] up to date
 

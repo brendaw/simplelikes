@@ -272,6 +272,7 @@ See [`examples/widget.html`](examples/widget.html) for a live demo.
 | `npm run dev:stop` | Stop local dev server |
 | `npm run dev:clean` | Remove `.wrangler/` (local D1 data and caches) |
 | `npm run dev:setup` | Apply schema to local D1 database (run after `dev:clean` or on first start) |
+| `npm run dev:reload` | Reset local DB and restart dev server (clean + setup + dev) |
 | `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |
 | `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |

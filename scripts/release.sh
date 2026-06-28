@@ -117,9 +117,9 @@ if [[ "$close_confirm" =~ ^[Yy]$ ]]; then
 	done
 fi
 
-# --- Commit ---
+# --- Commit & push main (no tag yet) ---
 echo ""
-echo "→ Committing..."
+echo "→ Committing CHANGELOG..."
 git add "$CHANGELOG"
 if (( ${#CLOSE_ISSUES[@]} > 0 )); then
 	closes_body=""
@@ -131,27 +131,51 @@ else
 	git commit -m "chore: release $TAG"
 fi
 
-echo "→ Moving tag $TAG to release commit..."
-git tag -f "$TAG"
-
 echo "→ Pushing main..."
 git push origin main
 
-echo "→ Pushing tag $TAG..."
-git push origin "$TAG"
+echo ""
+echo "✓ Main pushed. Staging CI is running."
+echo "  Track at: https://github.com/$REPO/actions"
+echo ""
 
-if ! git ls-remote origin "refs/tags/$TAG" | grep -q .; then
-	echo ""
-	echo "✗ Tag $TAG was not pushed to remote."
-	echo "  Push it manually:"
-	echo "    git push origin $TAG"
-	exit 1
-fi
+# --- Tag — only after staging validation ---
+echo "→ Tagging $TAG locally..."
+git tag -f "$TAG"
 
 echo ""
-echo "✓ Release $TAG pushed."
-echo "  GitHub Actions release and deploy triggered automatically."
-echo "  Track at: https://github.com/$REPO/actions"
+echo "╔══════════════════════════════════════════════════════════╗"
+echo "║  Tag $TAG created locally.                        ║"
+echo "║                                                          ║"
+echo "║  Push it ONLY after staging CI (Build + Deploy staging   ║"
+echo "║  + Integration tests) passes on main.                    ║"
+echo "║                                                          ║"
+echo "║  git push origin $TAG                                     ║"
+echo "╚══════════════════════════════════════════════════════════╝"
+echo ""
+
+read -r -p "Push tag $TAG now and trigger production deploy? [y/N] " tag_confirm
+if [[ "$tag_confirm" =~ ^[Yy]$ ]]; then
+	echo ""
+	echo "→ Pushing tag $TAG..."
+	git push origin "$TAG"
+
+	if ! git ls-remote origin "refs/tags/$TAG" | grep -q .; then
+		echo ""
+		echo "✗ Tag $TAG was not pushed to remote."
+		echo "  Push it manually:"
+		echo "    git push origin $TAG"
+		exit 1
+	fi
+
+	echo ""
+	echo "✓ Tag $TAG pushed. Production deploy triggered."
+	echo "  Track at: https://github.com/$REPO/actions"
+else
+	echo ""
+	echo "Tag not pushed. When ready:"
+	echo "  git push origin $TAG"
+fi"
 
 if (( ${#CLOSE_ISSUES[@]} > 0 )); then
 	echo ""
