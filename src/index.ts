@@ -9,6 +9,9 @@ interface Env {
   DB: D1Database;
   ALLOWED_ORIGINS?: string;
   INTEGRATION_TEST_SECRET?: string;
+  RATE_LIMIT_PER_IP?: string;
+  RATE_LIMIT_GLOBAL_GET?: string;
+  RATE_LIMIT_GLOBAL_POST?: string;
 }
 
 interface HandlerOptions {
@@ -73,6 +76,11 @@ export async function handleRequest(
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const storage = new D1Storage(env.DB);
+    rateLimit.configure({
+      perIpLimit: env.RATE_LIMIT_PER_IP ? Number(env.RATE_LIMIT_PER_IP) : undefined,
+      globalGetLimit: env.RATE_LIMIT_GLOBAL_GET ? Number(env.RATE_LIMIT_GLOBAL_GET) : undefined,
+      globalPostLimit: env.RATE_LIMIT_GLOBAL_POST ? Number(env.RATE_LIMIT_GLOBAL_POST) : undefined,
+    });
     return handleRequest(request, storage, {
       allowedOrigins: env.ALLOWED_ORIGINS,
       integrationTestSecret: env.INTEGRATION_TEST_SECRET,

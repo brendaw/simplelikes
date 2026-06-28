@@ -3,12 +3,24 @@ interface RateLimitEntry {
   resetAt: number;
 }
 
+interface RateLimitConfig {
+  perIpLimit?: number;
+  globalGetLimit?: number;
+  globalPostLimit?: number;
+}
+
 const store = new Map<string, RateLimitEntry>();
 
 const WINDOW_MS = 60_000;
-const PER_IP_LIMIT = 10;
-const GLOBAL_GET_LIMIT = 500;
-const GLOBAL_POST_LIMIT = 50;
+let PER_IP_LIMIT = 10;
+let GLOBAL_GET_LIMIT = 500;
+let GLOBAL_POST_LIMIT = 50;
+
+function configure(options: RateLimitConfig): void {
+  if (options.perIpLimit !== undefined) PER_IP_LIMIT = options.perIpLimit;
+  if (options.globalGetLimit !== undefined) GLOBAL_GET_LIMIT = options.globalGetLimit;
+  if (options.globalPostLimit !== undefined) GLOBAL_POST_LIMIT = options.globalPostLimit;
+}
 
 function check(key: string, limit: number = PER_IP_LIMIT): boolean {
   const now = Date.now();
@@ -39,4 +51,4 @@ function retryAfter(method: "GET" | "POST"): number {
   return Math.max(1, Math.ceil((entry.resetAt - Date.now()) / 1000));
 }
 
-export const rateLimit = { check, checkGlobal, retryAfter };
+export const rateLimit = { configure, check, checkGlobal, retryAfter };

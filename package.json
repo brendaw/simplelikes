@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "dev:stop": "pkill -f 'wrangler dev' || echo 'No server running'",
+    "dev:clean": "rm -rf .wrangler/",
+    "dev:setup": "wrangler d1 execute simplelikes --local --file=src/db/schema.sql",
     "deploy": "wrangler deploy",
     "deploy:staging": "wrangler deploy --env staging",
     "deploy:production": "wrangler deploy --env production",

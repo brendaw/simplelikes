@@ -231,55 +231,27 @@ For Cloudflare deployment, run `npm run setup` to auto-detect databases, generat
 
 ## Client-side usage
 
-### Widget (custom element)
-
-The [`examples/simple-likes.js`](examples/simple-likes.js) script provides a zero-config custom element with built-in SVG rendering:
+[`examples/simple-likes.js`](examples/simple-likes.js) provides a `<simple-likes>` custom element for anonymous likes on any static site:
 
 ```html
 <script src="simple-likes.js"></script>
 <script>window.__simpleLikesApiUrl = "https://simplelikes.william-brendaw.workers.dev";</script>
 
 <simple-likes slug="hello-world"></simple-likes>
-<simple-likes slug="my-post" data-icon="thumbs-up"></simple-likes>
-<simple-likes slug="note-1" data-icon="star"></simple-likes>
+<simple-likes slug="my-post"></simple-likes>
 ```
 
-**Icons:** `heart` (default), `thumbs-up`, `star` — set via `data-icon`.
-
-**Customization** via CSS custom properties:
+Each element renders a "N likes" button. The script automatically:
+- Batch-fetches all counts on page load via a single request
+- Increments the count via POST on click
+- Prevents duplicates via localStorage
+- Adds a `.liked` class to already-liked buttons (style it via CSS)
 
 ```css
-simple-likes {
-  --sl-color: #9b59b6;          /* icon color (default: currentColor) */
-  --sl-color-active: #e74c3c;   /* liked state color (default: #e74c3c) */
-  --sl-size: 24px;              /* icon size (default: 20px) */
-}
+.sl-btn.liked { color: #e74c3c; }
 ```
-
-The widget automatically:
-- Renders the SVG icon and counter
-- Batch-fetches all counts on page load in a single request
-- Handles click → POST increment → updates count + toggles icon
-- Prevents duplicates via localStorage
 
 See [`examples/widget.html`](examples/widget.html) for a live demo.
-
-### Classic API (backward compatible)
-
-The original [`examples/likes.js`](examples/likes.js) API still works:
-
-```html
-<button class="like-btn" data-slug="hello-world">
-  <span data-counter>0</span> likes
-</button>
-
-<script src="likes.js"></script>
-<script>
-  new LikesClient({ apiUrl: "https://simplelikes.william-brendaw.workers.dev" });
-</script>
-```
-
-`new LikesClient({ apiUrl })` scans for `[data-slug]` elements, batch-loads counts, and wires up click handlers. This API is also exported by `simple-likes.js` — you can use either script.
 
 ## Scripts
 
@@ -287,6 +259,8 @@ The original [`examples/likes.js`](examples/likes.js) API still works:
 |---|---|
 | `npm run dev` | Start local dev server (loads `.env` automatically) |
 | `npm run dev:stop` | Stop local dev server |
+| `npm run dev:clean` | Remove `.wrangler/` (local D1 data and caches) |
+| `npm run dev:setup` | Apply schema to local D1 database (run after `dev:clean` or on first start) |
 | `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |
 | `npm run db:migrate` | Apply schema to remote D1 databases |
 | `npm run typecheck` | TypeScript type checking |
