@@ -135,17 +135,19 @@ Os seguintes segredos devem estar configurados no repositório para o CI/CD func
 | `D1_STAGING_DATABASE_ID` | ID do banco D1 de staging |
 | `D1_PRODUCTION_DATABASE_ID` | ID do banco D1 de production |
 | `INTEGRATION_TEST_SECRET` | Header `X-Integration-Test` para bypass de rate limit nos testes integrados |
+| `INTEGRATION_TEST_URL_STAGING` | URL do Worker de staging para testes integrados |
+| `INTEGRATION_TEST_URL_PRODUCTION` | URL do Worker de produção para testes integrados |
 | `ALLOWED_ORIGINS` | Origem CORS esperada — validada pelos testes de integração via `EXPECTED_ORIGIN` |
 
 **Forks** precisam configurar seus próprios segredos, especialmente `ALLOWED_ORIGINS` com sua própria origem, senão o teste de CORS falhará com a mensagem `EXPECTED_ORIGIN environment variable must be set`.
 
 ## Testes de integração
 
-Os testes de integração em `test/integration.test.ts` batem contra o ambiente staging ou production real (`simplelikes-staging.william-brendaw.workers.dev` ou `simplelikes.william-brendaw.workers.dev`).
+Os testes de integração em `test/integration.test.ts` batem contra o ambiente staging ou production real. A URL de cada ambiente é carregada dos GitHub Secrets `INTEGRATION_TEST_URL_STAGING` e `INTEGRATION_TEST_URL_PRODUCTION`.
 
 ### No CI
 
-Rodam automaticamente no pipeline Deploy após o deploy, contra a URL do ambiente recém-deployado. Usam `INTEGRATION_TEST_SECRET` (GitHub Secret) para bypass do rate limit.
+Rodam automaticamente no pipeline Deploy após o deploy, contra a URL do ambiente recém-deployado (definida pelos secrets `INTEGRATION_TEST_URL_STAGING` ou `INTEGRATION_TEST_URL_PRODUCTION`). Usam `INTEGRATION_TEST_SECRET` para bypass do rate limit.
 
 ### Localmente
 
