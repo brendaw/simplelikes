@@ -52,24 +52,33 @@ jobs:
             echo "" > _release_notes.md
           fi
 
-      - name: Build distribution archive
+      - name: Build distribution archives
         run: |
           TAG="${{ steps.tag.outputs.tag }}"
-          DIST="dist/simplelikes-${TAG}"
-          mkdir -p "${DIST}/src" "${DIST}/examples" "${DIST}/scripts"
-          cp -r src/ "${DIST}/src/"
-          cp -r examples/ "${DIST}/examples/"
-          cp dist/simple-likes.js "${DIST}/"
-          cp package.json "${DIST}/"
-          cp package-lock.json "${DIST}/"
-          cp tsconfig.json "${DIST}/"
-          cp wrangler.toml.example "${DIST}/"
-          cp .env.example "${DIST}/"
-          cp LICENSE "${DIST}/"
-          cp README.md "${DIST}/"
-          [ -f scripts/setup.sh ] && cp scripts/setup.sh "${DIST}/scripts/"
+
+          # Client archive (frontend-only)
+          CLIENT_DIR="dist/simplelikes-client-${TAG}"
+          mkdir -p "${CLIENT_DIR}"
+          cp dist/simple-likes.js "${CLIENT_DIR}/"
+          cp dist/simple-likes.min.js "${CLIENT_DIR}/"
           cd dist
-          zip -r "simplelikes-${TAG}.zip" "simplelikes-${TAG}/"
+          zip -r "simplelikes-client-${TAG}.zip" "simplelikes-client-${TAG}/"
+
+          # API archive (self-host)
+          API_DIR="dist/simplelikes-api-${TAG}"
+          mkdir -p "${API_DIR}/scripts"
+          cp dist/simple-likes.js "${API_DIR}/"
+          cp -r src/ "${API_DIR}/src/"
+          cp -r examples/ "${API_DIR}/examples/"
+          cp package.json "${API_DIR}/"
+          cp package-lock.json "${API_DIR}/"
+          cp tsconfig.json "${API_DIR}/"
+          cp wrangler.toml.example "${API_DIR}/"
+          cp .env.example "${API_DIR}/"
+          cp LICENSE "${API_DIR}/"
+          cp README.md "${API_DIR}/"
+          [ -f scripts/setup.sh ] && cp scripts/setup.sh "${API_DIR}/scripts/"
+          zip -r "simplelikes-api-${TAG}.zip" "simplelikes-api-${TAG}/"
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
@@ -77,6 +86,7 @@ jobs:
           tag_name: ${{ steps.changelog.outputs.tag }}
           body_path: _release_notes.md
           files: |
-            dist/simplelikes-${{ steps.changelog.outputs.tag }}.zip
+            dist/simplelikes-client-${{ steps.changelog.outputs.tag }}.zip
+            dist/simplelikes-api-${{ steps.changelog.outputs.tag }}.zip
             dist/simple-likes.js
           generate_release_notes: false

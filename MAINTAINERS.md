@@ -106,9 +106,10 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
 - **Trigger:** `workflow_dispatch` apenas (manual ou via Deploy)
 - **Não escuta `push: tags`** — o Deploy é o único trigger automatizado para evitar disparo duplicado
 - **Estágio único:** Cria GitHub Release a partir da entrada do CHANGELOG para a tag informada
-- **Assets gerados:**
+- **Assets gerados (3), todos extraíveis via página da Release:**
   - `simple-likes.js` — client bundle standalone (~7kb, uso frontend-only)
-  - `simplelikes-<tag>.zip` — arquivo completo para self-host (src, schema, examples, scripts, configs)
+  - `simplelikes-client-<tag>.zip` — client bundle + versão minified (`simple-likes.js` + `simple-likes.min.js`, ~11kb total)
+  - `simplelikes-api-<tag>.zip` — pacote completo para self-host (src, schema, examples, scripts de setup, configs de deploy)
 
 ### Fluxo de release completo
 

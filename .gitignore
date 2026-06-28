@@ -1,6 +1,7 @@
 node_modules/
 dist/
 examples/simple-likes.js
+*.min.js
 .env
 *.local
 wrangler.toml
