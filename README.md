@@ -15,7 +15,7 @@ A minimal, standalone likes counter API. Drop-in anonymous likes for any static 
 ## Features
 
 - `GET /likes/:slug` — returns current count
-- `POST /likes/:slug` — increments count (with dedup per visitor)
+- `POST /likes/:slug` — toggles like/unlike (dedup per visitor)
 - `POST /likes/batch` — returns counts for multiple slugs at once
 - CORS whitelist — only your domain can call the API
 - Rate limiting — per-IP (10 req/min) + global safeguard (500 GET/min, 50 POST/min)
@@ -29,18 +29,23 @@ A minimal, standalone likes counter API. Drop-in anonymous likes for any static 
 ```bash
 npm install
 cp .env.example .env
+npm run dev:setup     # create local D1 tables (required once)
 npm run dev
 ```
 
-The dev server starts at `http://localhost:8787`. No Cloudflare account needed — a local SQLite database is created automatically.
+The dev server starts at `http://localhost:8787`. No Cloudflare account needed — a local SQLite database is created and the schema is applied by `dev:setup`.
 
 ```bash
 curl http://localhost:8787/likes/hello-world
 # {"slug":"hello-world","count":0}
 
 curl -X POST http://localhost:8787/likes/hello-world \
-  -H "X-Visitor-Id: test-visitor"
-# {"slug":"hello-world","count":1}
+  -H "X-Visitor-Id: visitor-1"
+# {"slug":"hello-world","count":1,"liked":true}
+
+curl -X POST http://localhost:8787/likes/hello-world \
+  -H "X-Visitor-Id: visitor-1"
+# {"slug":"hello-world","count":0,"liked":false}
 ```
 
 ## API
@@ -249,7 +254,7 @@ For Cloudflare deployment, run `npm run setup` to auto-detect databases, generat
 
 Each element renders a "N likes" button. The script automatically:
 - Batch-fetches all counts on page load via a single request
-- Increments the count via POST on click
+- Toggles the like via POST on click
 - Prevents duplicates via localStorage
 - Adds a `.liked` class to already-liked buttons (style it via CSS)
 

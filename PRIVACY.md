@@ -11,6 +11,7 @@ simplelikes is designed to be **anonymous by default**. This document explains w
 | IP address | ❌ Never stored | Used transiently for rate limiting (in-memory, no log) |
 | User-Agent | ❌ Never stored | Not read or transmitted |
 | Cookies | ❌ None set | No cookies set server-side or client-side |
+| localStorage (client-side) | ✅ Used by widget | Stores `liked:<slug>` flag for persistence across page loads — no personal data, never sent to the server |
 | Browser fingerprint | ❌ Not collected | `X-Visitor-Id` is a client-side hash, never sent raw |
 | Page URL | ❌ Not collected | Only the slug is sent (e.g., `hello-world`) |
 | Slug + count | ✅ Stored in D1/SQLite | The only persisted data |
@@ -18,13 +19,14 @@ simplelikes is designed to be **anonymous by default**. This document explains w
 
 ### Visitor hash
 
-The `X-Visitor-Id` header sent by the client script is a **SHA-256 hash of the browser's `User-Agent` and the visitor's IP address**, generated client-side by the `<simple-likes>` custom element. The server never receives the raw `User-Agent` or IP — only the opaque hash, which cannot be reversed to recover the original values.
+The `X-Visitor-Id` header sent by the client script is a **simple hash of the browser's `User-Agent` and screen dimensions**, generated client-side by the `<simple-likes>` custom element. The server never receives the raw `User-Agent` or screen dimensions — only the opaque hash, which cannot be reversed to recover the original values.
 
 ## How data is used
 
 - **Like counts** (`slug` + `count`) are exposed via the API and displayed to visitors
 - **Visitor hashes** are used exclusively for deduplication (one like per visitor per slug) and are never exposed via the API
 - **IP addresses** are held temporarily in memory for rate limiting and discarded after the request completes — they are not logged, stored, or transmitted
+- **localStorage** (client-side only) stores a `liked:<slug>` flag so the widget remembers which slugs the visitor already liked across page loads — this data never leaves the browser
 
 ## Data retention
 

@@ -28,7 +28,13 @@ For bug reports or feature requests, [open an Issue](https://github.com/brendaw/
    cp .env.example .env
    ```
 
-3. Start the local dev server (loads `.env` automatically):
+3. Create local D1 tables (required once):
+
+   ```bash
+   npm run dev:setup
+   ```
+
+4. Start the local dev server (loads `.env` automatically):
 
    ```bash
    npm run dev
@@ -40,15 +46,15 @@ For bug reports or feature requests, [open an Issue](https://github.com/brendaw/
    curl http://localhost:8787/likes/hello-world
    ```
 
-4. Make your changes in `src/`.
+5. Make your changes in `src/`.
 
-5. Run type check and tests before opening a PR:
+6. Run type check and tests before opening a PR:
 
    ```bash
    npm run typecheck && npm test
    ```
 
-6. Open a Pull Request against `main` describing what changed and why.
+7. Open a Pull Request against `main` describing what changed and why.
 
 You do not need to bump versions or update CHANGELOG.md — versioning and releases are handled by the maintainer after the PR is merged.
 
