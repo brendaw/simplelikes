@@ -1,15 +1,25 @@
 import { describe, it, expect } from "vitest";
 
 describe("cors", () => {
-  it("create defaults to localhost:8787", async () => {
+  it("create defaults to common localhost ports", async () => {
     const { cors } = await import("../src/utils/cors");
     const c = cors.create();
 
-    const req = new Request("http://localhost/test", {
+    const req8787 = new Request("http://localhost/test", {
       headers: { Origin: "http://localhost:8787" },
     });
-    const res = c.handlePreflight(req);
-    expect(res.headers.get("access-control-allow-origin")).toBe("http://localhost:8787");
+    expect(c.handlePreflight(req8787).headers.get("access-control-allow-origin")).toBe("http://localhost:8787");
+
+    const req3000 = new Request("http://localhost/test", {
+      headers: { Origin: "http://localhost:3000" },
+    });
+    expect(c.handlePreflight(req3000).headers.get("access-control-allow-origin")).toBe("http://localhost:3000");
+
+    // Unknown port should be rejected
+    const req9999 = new Request("http://localhost/test", {
+      headers: { Origin: "http://localhost:9999" },
+    });
+    expect(c.handlePreflight(req9999).headers.get("access-control-allow-origin")).toBeNull();
   });
 
   it("create accepts a single origin", async () => {

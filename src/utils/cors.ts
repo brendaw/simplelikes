@@ -1,6 +1,6 @@
 function create(allowedOrigins?: string) {
   const origins = new Set(
-    (allowedOrigins || "http://localhost:8787")
+    (allowedOrigins || "http://localhost:8787,http://localhost:3000,http://localhost:5173,http://localhost:8080")
       .split(",")
       .map((o) => o.trim()),
   );

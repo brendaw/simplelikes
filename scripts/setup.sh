@@ -37,7 +37,7 @@ echo "📝 Generating $WRANGLER_TOML..."
 
 # Read env values from .env if available
 INTEGRATION_TEST_SECRET="change-me"
-ALLOWED_ORIGINS="http://localhost:8787"
+ALLOWED_ORIGINS="http://localhost:8787,http://localhost:3000,http://localhost:5173,http://localhost:8080"
 if [ -f .env ]; then
   INTEGRATION_TEST_SECRET=$(grep "^INTEGRATION_TEST_SECRET=" .env | cut -d= -f2- || echo "$INTEGRATION_TEST_SECRET")
   ALLOWED_ORIGINS=$(grep "^ALLOWED_ORIGINS=" .env | cut -d= -f2- || echo "$ALLOWED_ORIGINS")
