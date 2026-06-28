@@ -77,10 +77,10 @@ describe("handler", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(body).toMatchObject({ slug: "hello", count: 1, alreadyLiked: false });
+    expect(body).toMatchObject({ slug: "hello", count: 1, liked: true });
   });
 
-  it("POST /likes/:slug with existing visitor and null count uses fallback 0", async () => {
+  it("POST /likes/:slug toggles unlike for existing visitor", async () => {
     const handler = await createHandler();
     const stmt = createMockStmt();
     stmt.first
@@ -92,14 +92,14 @@ describe("handler", () => {
       headers: { "X-Visitor-Id": "visitor-1" },
     });
     const env = {
-      DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn() } as any,
+      DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn().mockResolvedValue([]) } as any,
     };
 
     const res = await handler.fetch(req, env);
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(body).toMatchObject({ slug: "hello", count: 0, alreadyLiked: true });
+    expect(body).toMatchObject({ slug: "hello", count: 0, liked: false });
   });
 
   it("POST /likes/:slug with new visitor and null count uses fallback 1", async () => {
@@ -121,10 +121,10 @@ describe("handler", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(body).toMatchObject({ slug: "hello", count: 1, alreadyLiked: false });
+    expect(body).toMatchObject({ slug: "hello", count: 1, liked: true });
   });
 
-  it("POST /likes/:slug with existing visitor returns alreadyLiked: true", async () => {
+  it("POST /likes/:slug toggles unlike for existing visitor with count", async () => {
     const handler = await createHandler();
     const stmt = createMockStmt();
     stmt.first
@@ -136,14 +136,14 @@ describe("handler", () => {
       headers: { "X-Visitor-Id": "visitor-1" },
     });
     const env = {
-      DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn() } as any,
+      DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn().mockResolvedValue([]) } as any,
     };
 
     const res = await handler.fetch(req, env);
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(body).toMatchObject({ slug: "hello", count: 5, alreadyLiked: true });
+    expect(body).toMatchObject({ slug: "hello", count: 5, liked: false });
   });
 
   it("POST /likes/:slug missing X-Visitor-Id returns 400", async () => {

@@ -134,7 +134,7 @@ class SimpleLikes extends HTMLElement {
   }
 
   async _handleClick() {
-    if (this._liked || !this.slug) return;
+    if (!this.slug) return;
     const visitorId = this._visitorId || (this._visitorId = generateVisitorId());
 
     try {
@@ -146,11 +146,15 @@ class SimpleLikes extends HTMLElement {
         },
       });
       const data = await res.json();
-      localStorage.setItem('liked:' + this.slug, '1');
       this._count = data.count;
-      this._liked = true;
+      this._liked = data.liked;
       this._updateCount();
-      this._btn.classList.add('liked');
+      this._btn.classList.toggle('liked', data.liked);
+      if (data.liked) {
+        localStorage.setItem('liked:' + this.slug, '1');
+      } else {
+        localStorage.removeItem('liked:' + this.slug);
+      }
     } catch {
       // Silently fail
     }

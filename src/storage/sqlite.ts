@@ -7,6 +7,8 @@ export class Sqlite3Storage implements IStorage {
   private hasVisitorStmt: Database.Statement<[string, string]>;
   private insertLikeStmt: Database.Statement<[string]>;
   private insertVisitorStmt: Database.Statement<[string, string]>;
+  private decrementLikeStmt: Database.Statement<[string]>;
+  private deleteVisitorStmt: Database.Statement<[string, string]>;
 
   constructor(dbPath: string = "./data/likes.db") {
     this.db = new Database(dbPath);
@@ -36,6 +38,12 @@ export class Sqlite3Storage implements IStorage {
     this.insertVisitorStmt = this.db.prepare(
       "INSERT INTO likes_visitors (slug, visitor_id, created_at) VALUES (?, ?, datetime('now'))",
     );
+    this.decrementLikeStmt = this.db.prepare(
+      "UPDATE likes SET count = count - 1, updated_at = datetime('now') WHERE slug = ? AND count > 0",
+    );
+    this.deleteVisitorStmt = this.db.prepare(
+      "DELETE FROM likes_visitors WHERE slug = ? AND visitor_id = ?",
+    );
   }
 
   getCount(slug: string): Promise<number> {
@@ -51,6 +59,11 @@ export class Sqlite3Storage implements IStorage {
   async increment(slug: string, visitorId: string): Promise<void> {
     this.insertLikeStmt.run(slug);
     this.insertVisitorStmt.run(slug, visitorId);
+  }
+
+  async decrement(slug: string, visitorId: string): Promise<void> {
+    this.decrementLikeStmt.run(slug);
+    this.deleteVisitorStmt.run(slug, visitorId);
   }
 
   batchGet(slugs: string[]): Promise<Record<string, number>> {

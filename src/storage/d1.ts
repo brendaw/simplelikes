@@ -34,6 +34,13 @@ export class D1Storage implements IStorage {
     ]);
   }
 
+  async decrement(slug: string, visitorId: string): Promise<void> {
+    await this.db.batch([
+      this.db.prepare("UPDATE likes SET count = count - 1 WHERE slug = ? AND count > 0").bind(slug),
+      this.db.prepare("DELETE FROM likes_visitors WHERE slug = ? AND visitor_id = ?").bind(slug, visitorId),
+    ]);
+  }
+
   async batchGet(slugs: string[]): Promise<Record<string, number>> {
     const placeholders = slugs.map(() => "?");
     const { results } = await this.db.prepare(

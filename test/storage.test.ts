@@ -60,6 +60,16 @@ describe("D1Storage", () => {
     expect(result).toBe(false);
   });
 
+  it("decrement updates count and deletes visitor", async () => {
+    const db = mockDB();
+    db.batch.mockResolvedValue([]);
+    const storage = new D1Storage(db as any);
+
+    await storage.decrement("slug", "visitor-1");
+
+    expect(db.batch).toHaveBeenCalledOnce();
+  });
+
   it("increment calls batch with insert and visitor statements", async () => {
     const db = mockDB();
     db.batch.mockResolvedValue([]);
@@ -124,6 +134,21 @@ describe("Sqlite3Storage", () => {
     await storage.increment("slug2", "v-99");
     expect(await storage.hasVisitor("slug2", "v-99")).toBe(true);
     expect(await storage.hasVisitor("slug2", "other")).toBe(false);
+  });
+
+  it("decrement removes visitor and decreases count", async () => {
+    await storage.increment("dec-test", "v1");
+    expect(await storage.getCount("dec-test")).toBe(1);
+    expect(await storage.hasVisitor("dec-test", "v1")).toBe(true);
+
+    await storage.decrement("dec-test", "v1");
+    expect(await storage.getCount("dec-test")).toBe(0);
+    expect(await storage.hasVisitor("dec-test", "v1")).toBe(false);
+  });
+
+  it("decrement does not go below 0", async () => {
+    await storage.decrement("neg-test", "v1");
+    expect(await storage.getCount("neg-test")).toBe(0);
   });
 
   it("batchGet returns zeros for missing slugs", async () => {

@@ -122,12 +122,13 @@ async function handlePost(
     return c.wrap(new Response("X-Visitor-Id header required", { status: 400 }), request);
   }
 
-  const existing = await storage.hasVisitor(slug, visitorId);
+  const liked = await storage.hasVisitor(slug, visitorId);
 
-  if (existing) {
+  if (liked) {
+    await storage.decrement(slug, visitorId);
     const count = await storage.getCount(slug);
     return c.wrap(
-      Response.json({ slug, count, alreadyLiked: true }),
+      Response.json({ slug, count, liked: false }),
       request,
     );
   }
@@ -136,7 +137,7 @@ async function handlePost(
 
   const count = await storage.getCount(slug);
   return c.wrap(
-    Response.json({ slug, count: count || 1, alreadyLiked: false }),
+    Response.json({ slug, count: count || 1, liked: true }),
     request,
   );
 }

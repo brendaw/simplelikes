@@ -34,17 +34,17 @@ describeIf("integration tests", () => {
     });
     const body = await res.json();
     expect(res.status).toBe(200);
-    expect(body).toMatchObject({ slug, count: 1, alreadyLiked: false });
+    expect(body).toMatchObject({ slug, count: 1, liked: true });
   });
 
-  it("POST /likes/:slug with same visitor returns alreadyLiked: true", async () => {
+  it("POST /likes/:slug with same visitor toggles unlike", async () => {
     const res = await fetch(`${BASE_URL}/likes/${slug}`, {
       method: "POST",
       headers: { ...headers(), "X-Visitor-Id": visitorId },
     });
     const body = await res.json();
     expect(res.status).toBe(200);
-    expect(body).toMatchObject({ slug, count: 1, alreadyLiked: true });
+    expect(body).toMatchObject({ slug, count: 0, liked: false });
   });
 
   it("POST /likes/batch returns counts for multiple slugs", async () => {
