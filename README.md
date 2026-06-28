@@ -108,6 +108,8 @@ Read responses are cached at the edge using the **Cloudflare Cache API** to redu
 
 ## Security
 
+See [SECURITY.md](SECURITY.md) for the vulnerability disclosure policy.
+
 simplelikes is designed with defense in depth:
 
 | Layer | Mechanism |
