@@ -20,6 +20,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.tag }}
+          persist-credentials: false
 
       - uses: actions/setup-node@v6
         with:
@@ -60,13 +61,13 @@ jobs:
           cp -r examples/ "${DIST}/examples/"
           cp dist/simple-likes.js "${DIST}/"
           cp package.json "${DIST}/"
+          cp package-lock.json "${DIST}/"
           cp tsconfig.json "${DIST}/"
           cp wrangler.toml.example "${DIST}/"
+          cp .env.example "${DIST}/"
           cp LICENSE "${DIST}/"
           cp README.md "${DIST}/"
           [ -f scripts/setup.sh ] && cp scripts/setup.sh "${DIST}/scripts/"
-          [ -f package-lock.json ] && cp package-lock.json "${DIST}/"
-          [ -f .env.example ] && cp .env.example "${DIST}/"
           cd dist
           zip -r "simplelikes-${TAG}.zip" "simplelikes-${TAG}/"
 
@@ -75,5 +76,7 @@ jobs:
         with:
           tag_name: ${{ steps.changelog.outputs.tag }}
           body_path: _release_notes.md
-          files: dist/simplelikes-${{ steps.changelog.outputs.tag }}.zip
+          files: |
+            dist/simplelikes-${{ steps.changelog.outputs.tag }}.zip
+            dist/simple-likes.js
           generate_release_notes: false
