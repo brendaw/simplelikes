@@ -90,6 +90,8 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
 - **Trigger manual:** `workflow_dispatch` com input `skip-typecheck` opcional
 - **Estágios:** Typecheck → Unit tests com coverage (threshold 95%) → (se push) Trigger Deploy via `gh workflow run`
 - **Uso:** pipeline de entrada — valida o código e dispara o Deploy automaticamente; `workflow_dispatch` permite validar branches sem deploy
+- **Release commit skip:** commits com mensagem iniciando em `chore: release v` (gerados pelo `scripts/release.sh`) são **pulados por completo** quando enviados para `main`. O commit de release altera apenas o `CHANGELOG.md`, sem código fonte — não há o que validar. A validação real ocorre no push da tag, que dispara o build completo com deploy de produção.
+- **Concorrência:** release commits usam o SHA do commit como chave de concorrência. Quando o push da tag ocorre logo após o push da main, o workflow da tag **cancela** o workflow da main ainda pendente, eliminando runs "skipped" do histórico. Demais pushes usam a ref (`refs/heads/main` ou `refs/tags/v*`) como chave.
 
 ### Deploy
 
@@ -109,15 +111,12 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
 
 1. Desenvolva e faça merge dos PRs em `main`
 2. Execute `./scripts/release.sh` localmente:
-   - Gera CHANGELOG, commita e faz **push da main** (dispara staging)
+   - Gera CHANGELOG, commita (`chore: release vX.Y.Z`) e faz **push da main**
+   - **O build na main é pulado** (release commit só altera CHANGELOG, sem código) — nenhum deploy de staging ocorre
    - Cria a tag localmente
    - **Aguarda confirmação** antes de empurrar a tag
-3. Acompanhe o staging CI em **Actions**: Build → Deploy staging → Integration tests
-4. Só depois do staging verde, confirme o push da tag:
-   ```bash
-   git push origin v0.7.0
-   ```
-5. O push da tag dispara: **Build → Deploy production → Integration tests → Release**
+3. O push da tag dispara o pipeline completo: **Build → Deploy production → Integration tests → Release**
+4. Acompanhe a produção em **Actions** — se os integration tests passarem, o Release é criado automaticamente
 
 ### Reprocessamento manual
 
