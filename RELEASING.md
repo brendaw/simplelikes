@@ -30,9 +30,9 @@ This document describes the release process for maintainers of simplelikes.
 
 | Workflow | Triggers | Description |
 |---|---|---|
-| `build.yml` | Called by Deploy, `workflow_dispatch` | Typecheck → Unit tests with coverage (threshold 95%) |
-| `deploy.yml` | Push to `main`, push to tag, `workflow_dispatch` | Build → Deploy (staging/production) → Integration tests → (if production) → Release |
-| `release.yml` | `workflow_dispatch` | Create GitHub Release from CHANGELOG |
+| `build.yml` | Push to `main`, push to tag (`v*`), `workflow_dispatch` | Typecheck → Unit tests → (on push) trigger Deploy |
+| `deploy.yml` | `workflow_dispatch` (called by Build or manually) | Deploy (staging/production) → Integration tests → (if production) trigger-release → Release |
+| `release.yml` | `workflow_dispatch` (called by Deploy or manually) | Create GitHub Release + attach distribution zip from CHANGELOG |
 
 ### Lifecycle
 

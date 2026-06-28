@@ -109,9 +109,11 @@ Três workflows encadeados, cada um acionável individualmente via `workflow_dis
 
 1. Desenvolva e faça merge dos PRs em `main`
 2. Execute `./scripts/release.sh` localmente (cria tag e faz push)
-3. O push da tag dispara o Deploy automaticamente
-4. Deploy executa Build → Deploy production → Integration tests
-5. Se os testes integrados passarem, o Release é criado automaticamente
+3. O push da tag dispara o pipeline automaticamente: **Build → Deploy production → Integration tests → Release**
+4. Build executa Typecheck → Unit tests → dispara Deploy
+5. Deploy executa Deploy production → Integration tests → trigger-release
+6. trigger-release só roda se os testes integrados passarem no ambiente de produção
+7. Release gera a GitHub Release com o zip de distribuição anexado
 
 ### Reprocessamento manual
 
