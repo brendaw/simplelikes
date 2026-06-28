@@ -12,7 +12,7 @@
     "deploy:staging": "wrangler deploy --env staging",
     "deploy:production": "wrangler deploy --env production",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.client.json --noEmit",
-    "build:client": "esbuild src/client/index.ts --bundle --outfile=dist/simple-likes.js --format=iife --global-name=SimpleLikes",
+    "build:client": "esbuild src/client/index.ts --bundle --outfile=dist/simple-likes.js --format=iife --global-name=SimpleLikes && cp dist/simple-likes.js examples/simple-likes.js",
     "test": "vitest run tests/unit/ --exclude 'tests/unit/client/**'",
     "test:watch": "vitest tests/unit/ --exclude 'tests/unit/client/**'",
     "test:client": "vitest run tests/unit/client/*.test.ts",
