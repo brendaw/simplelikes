@@ -2,18 +2,22 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 function importComponent() {
-  return import("../src/client/index.js");
+  return import("../../src/client/index.js");
 }
 
 describe("SimpleLikes web component", () => {
   beforeEach(async () => {
     document.body.innerHTML = "";
     delete (window as any).__simpleLikesConfig;
+    delete (window as any).__simpleLikesApiUrl;
     vi.resetModules();
     await importComponent();
   });
 
-  function createElement(slug: string, attrs: Record<string, string> = {}): Element {
+  function createElement(
+    slug: string,
+    attrs: Record<string, string> = {},
+  ): Element {
     const el = document.createElement("simple-likes");
     el.setAttribute("slug", slug);
     for (const [k, v] of Object.entries(attrs)) {
@@ -53,13 +57,19 @@ describe("SimpleLikes web component", () => {
     });
 
     it("uses custom text and text-plural via attributes", () => {
-      const el = createElement("test-4", { text: "coração", "text-plural": "corações" });
+      const el = createElement("test-4", {
+        text: "coração",
+        "text-plural": "corações",
+      });
       expect(getBtn(el)?.innerHTML).toContain("corações");
       expect(getBtn(el)?.getAttribute("aria-label")).toBe("coração");
     });
 
     it("uses singular custom text when count is 1", () => {
-      const el = createElement("test-5", { text: "coração", "text-plural": "corações" });
+      const el = createElement("test-5", {
+        text: "coração",
+        "text-plural": "corações",
+      });
       (el as any)._count = 1;
       (el as any)._updateCount();
       expect(getBtn(el)?.innerHTML).toContain("coração");
@@ -70,7 +80,10 @@ describe("SimpleLikes web component", () => {
   describe("global config", () => {
     beforeEach(async () => {
       vi.resetModules();
-      (window as any).__simpleLikesConfig = { text: "star", "text-plural": "stars" };
+      (window as any).__simpleLikesConfig = {
+        text: "star",
+        "text-plural": "stars",
+      };
       await importComponent();
     });
 
@@ -90,15 +103,24 @@ describe("SimpleLikes web component", () => {
   describe("priority chain", () => {
     it("inline attribute wins over global config", async () => {
       vi.resetModules();
-      (window as any).__simpleLikesConfig = { text: "star", "text-plural": "stars" };
+      (window as any).__simpleLikesConfig = {
+        text: "star",
+        "text-plural": "stars",
+      };
       await importComponent();
-      const el = createElement("prior-1", { text: "coração", "text-plural": "corações" });
+      const el = createElement("prior-1", {
+        text: "coração",
+        "text-plural": "corações",
+      });
       expect(getBtn(el)?.innerHTML).toContain("corações");
     });
 
     it("global config wins over hardcoded default", async () => {
       vi.resetModules();
-      (window as any).__simpleLikesConfig = { text: "star", "text-plural": "stars" };
+      (window as any).__simpleLikesConfig = {
+        text: "star",
+        "text-plural": "stars",
+      };
       await importComponent();
       const el = createElement("prior-2");
       expect(getBtn(el)?.innerHTML).toContain("stars");
@@ -187,7 +209,9 @@ describe("SimpleLikes web component", () => {
     });
 
     it("returns attribute value when set", () => {
-      const el = createElement("plural-2", { "text-plural": "corações" }) as any;
+      const el = createElement("plural-2", {
+        "text-plural": "corações",
+      }) as any;
       expect(el.textPlural).toBe("corações");
     });
 
@@ -198,15 +222,21 @@ describe("SimpleLikes web component", () => {
 
     it("prioritizes attribute over global config", async () => {
       vi.resetModules();
-      (window as any).__simpleLikesConfig = { "text-plural": "global-stars" };
+      (window as any).__simpleLikesConfig = {
+        "text-plural": "global-stars",
+      };
       await importComponent();
-      const el = createElement("plural-4", { "text-plural": "inline-variants" }) as any;
+      const el = createElement("plural-4", {
+        "text-plural": "inline-variants",
+      }) as any;
       expect(el.textPlural).toBe("inline-variants");
     });
 
     it("falls back to global config when no attribute", async () => {
       vi.resetModules();
-      (window as any).__simpleLikesConfig = { "text-plural": "global-stars" };
+      (window as any).__simpleLikesConfig = {
+        "text-plural": "global-stars",
+      };
       await importComponent();
       const el = createElement("plural-5") as any;
       expect(el.textPlural).toBe("global-stars");

@@ -15,6 +15,7 @@
     "build:client": "esbuild src/client/index.ts --bundle --outfile=dist/simple-likes.js --format=iife --global-name=SimpleLikes",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:client": "vitest run test/client/*.test.ts",
     "test:coverage": "vitest run --coverage",
     "test:integration": "INTEGRATION_TEST_SECRET=\"${INTEGRATION_TEST_SECRET:-$(grep INTEGRATION_TEST_SECRET .env 2>/dev/null | cut -d= -f2)}\" vitest run test/integration.test.ts",
     "setup": "bash scripts/setup.sh",
