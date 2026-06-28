@@ -123,4 +123,34 @@ describe("rateLimit", () => {
     }
     expect(rateLimit.check("fresh-ip")).toBe(true);
   });
+
+  // configure() tests
+
+  it("configure custom per-ip limit overrides default", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    rateLimit.configure({ perIpLimit: 3 });
+
+    expect(rateLimit.check("ip")).toBe(true);
+    expect(rateLimit.check("ip")).toBe(true);
+    expect(rateLimit.check("ip")).toBe(true);
+    expect(rateLimit.check("ip")).toBe(false);
+  });
+
+  it("configure custom global GET limit overrides default", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    rateLimit.configure({ globalGetLimit: 2 });
+
+    expect(rateLimit.checkGlobal("GET")).toBe(true);
+    expect(rateLimit.checkGlobal("GET")).toBe(true);
+    expect(rateLimit.checkGlobal("GET")).toBe(false);
+  });
+
+  it("configure custom global POST limit overrides default", async () => {
+    const { rateLimit } = await import("../src/utils/rate-limit");
+    rateLimit.configure({ globalPostLimit: 2 });
+
+    expect(rateLimit.checkGlobal("POST")).toBe(true);
+    expect(rateLimit.checkGlobal("POST")).toBe(true);
+    expect(rateLimit.checkGlobal("POST")).toBe(false);
+  });
 });

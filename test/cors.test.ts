@@ -120,4 +120,34 @@ describe("cors", () => {
     expect(res.headers.get("access-control-allow-origin")).toBeNull();
     expect(res.headers.get("vary")).toBeNull();
   });
+
+  it("create with version adds X-Version to preflight response", async () => {
+    const { cors } = await import("../src/utils/cors");
+    const c = cors.create("https://mysite.com", "v1.0.0");
+
+    const req = new Request("http://localhost/test", {
+      headers: { Origin: "https://mysite.com" },
+    });
+    const res = c.handlePreflight(req);
+    expect(res.headers.get("x-version")).toBe("v1.0.0");
+  });
+
+  it("create with version adds X-Version to wrapped response", async () => {
+    const { cors } = await import("../src/utils/cors");
+    const c = cors.create(undefined, "v2.0.0");
+
+    const res = c.wrap(new Response("ok"), new Request("http://localhost/test"));
+    expect(res.headers.get("x-version")).toBe("v2.0.0");
+  });
+
+  it("create without version omits X-Version header", async () => {
+    const { cors } = await import("../src/utils/cors");
+    const c = cors.create();
+
+    const req = new Request("http://localhost/test", {
+      headers: { Origin: "https://mysite.com" },
+    });
+    expect(c.handlePreflight(req).headers.get("x-version")).toBeNull();
+    expect(c.wrap(new Response("ok"), req).headers.get("x-version")).toBeNull();
+  });
 });

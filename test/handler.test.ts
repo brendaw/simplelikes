@@ -608,4 +608,87 @@ describe("handler", () => {
     expect(blockedRes.status).toBe(429);
     expect(blockedRes.headers.get("Retry-After")).toBeNull();
   });
+
+  // Env var overrides for rate limits
+
+  it("RATE_LIMIT_PER_IP env var overrides default per-IP limit", async () => {
+    const handler = await createHandler();
+    const stmt = createMockStmt();
+    stmt.first.mockResolvedValue({ count: 0 });
+
+    const env = {
+      DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn() } as any,
+      RATE_LIMIT_PER_IP: "3",
+    };
+
+    for (let i = 0; i < 3; i++) {
+      const req = new Request("http://localhost/likes/test");
+      const res = await handler.fetch(req, env);
+      expect(res.status).toBe(200);
+    }
+
+    const blockedReq = new Request("http://localhost/likes/blocked");
+    const blockedRes = await handler.fetch(blockedReq, env);
+    expect(blockedRes.status).toBe(429);
+  });
+
+  it("RATE_LIMIT_GLOBAL_GET env var overrides default global GET limit", async () => {
+    const handler = await createHandler();
+    const stmt = createMockStmt();
+    stmt.first.mockResolvedValue({ count: 0 });
+
+    const env = {
+      DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn() } as any,
+      RATE_LIMIT_GLOBAL_GET: "2",
+    };
+
+    for (let i = 0; i < 2; i++) {
+      const req = new Request(`http://localhost/likes/slug-${i}`, {
+        headers: { "CF-Connecting-IP": `ip-${i}` },
+      });
+      const res = await handler.fetch(req, env);
+      expect(res.status).toBe(200);
+    }
+
+    const blockedReq = new Request("http://localhost/likes/blocked", {
+      headers: { "CF-Connecting-IP": "unique-ip" },
+    });
+    const blockedRes = await handler.fetch(blockedReq, env);
+    expect(blockedRes.status).toBe(429);
+  });
+
+  it("RATE_LIMIT_GLOBAL_POST env var overrides default global POST limit", async () => {
+    const handler = await createHandler();
+    const stmt = createMockStmt();
+    stmt.first
+      .mockResolvedValue(null)
+      .mockResolvedValue({ count: 1 });
+
+    const env = {
+      DB: { prepare: vi.fn().mockReturnValue(stmt), batch: vi.fn().mockResolvedValue([]) } as any,
+      RATE_LIMIT_GLOBAL_POST: "2",
+    };
+
+    for (let i = 0; i < 2; i++) {
+      const req = new Request(`http://localhost/likes/slug-${i}`, {
+        method: "POST",
+        headers: {
+          "X-Visitor-Id": `visitor-${i}`,
+          "CF-Connecting-IP": `ip-${i}`,
+        },
+      });
+      const res = await handler.fetch(req, env);
+      expect(res.status).toBe(200);
+    }
+
+    const blockedReq = new Request("http://localhost/likes/blocked", {
+      method: "POST",
+      headers: {
+        "X-Visitor-Id": "new-visitor",
+        "CF-Connecting-IP": "unique-ip",
+      },
+    });
+    const blockedRes = await handler.fetch(blockedReq, env);
+    expect(blockedRes.status).toBe(429);
+  });
 });
