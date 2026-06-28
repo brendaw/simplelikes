@@ -43,10 +43,13 @@ if [ -f .env ]; then
   ALLOWED_ORIGINS=$(grep "^ALLOWED_ORIGINS=" .env | cut -d= -f2- || echo "$ALLOWED_ORIGINS")
 fi
 
+VERSION="${VERSION:-$(git rev-parse --short HEAD 2>/dev/null || echo dev)}"
+
 sed -e "s|__STAGING_DATABASE_ID__|$STAGING_DB_ID|g" \
     -e "s|__PRODUCTION_DATABASE_ID__|$PROD_DB_ID|g" \
     -e "s|__INTEGRATION_TEST_SECRET__|$INTEGRATION_TEST_SECRET|g" \
     -e "s|__ALLOWED_ORIGINS__|$ALLOWED_ORIGINS|g" \
+    -e "s|__VERSION__|$VERSION|g" \
     wrangler.toml.example > "$WRANGLER_TOML"
 echo "✅ $WRANGLER_TOML created."
 

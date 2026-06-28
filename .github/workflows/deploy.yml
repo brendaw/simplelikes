@@ -47,6 +47,7 @@ jobs:
           sed -i "s|__STAGING_DATABASE_ID__|$D1_STAGING_DATABASE_ID|g" wrangler.toml
           sed -i "s|__INTEGRATION_TEST_SECRET__|$INTEGRATION_TEST_SECRET|g" wrangler.toml
           sed -i "s|__ALLOWED_ORIGINS__|$ALLOWED_ORIGINS|g" wrangler.toml
+          sed -i "s|__VERSION__|$(git rev-parse --short HEAD)|g" wrangler.toml
         env:
           D1_STAGING_DATABASE_ID: ${{ secrets.D1_STAGING_DATABASE_ID }}
           INTEGRATION_TEST_SECRET: ${{ secrets.INTEGRATION_TEST_SECRET }}
@@ -76,6 +77,7 @@ jobs:
           cp wrangler.toml.example wrangler.toml
           sed -i "s|__PRODUCTION_DATABASE_ID__|$D1_PRODUCTION_DATABASE_ID|g" wrangler.toml
           sed -i "s|__ALLOWED_ORIGINS__|$ALLOWED_ORIGINS|g" wrangler.toml
+          sed -i "s|__VERSION__|${{ github.ref_name }}|g" wrangler.toml
         env:
           D1_PRODUCTION_DATABASE_ID: ${{ secrets.D1_PRODUCTION_DATABASE_ID }}
           ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}

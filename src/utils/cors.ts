@@ -1,4 +1,4 @@
-function create(allowedOrigins?: string) {
+function create(allowedOrigins?: string, version?: string) {
   const origins = new Set(
     (allowedOrigins || "http://localhost:8787,http://localhost:3000,http://localhost:5173,http://localhost:8080")
       .split(",")
@@ -19,15 +19,14 @@ function create(allowedOrigins?: string) {
       return new Response(null, { status: 204 });
     }
 
-    return new Response(null, {
-      status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": origin,
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, X-Visitor-Id",
-        "Access-Control-Max-Age": "86400",
-      },
-    });
+    const headers: Record<string, string> = {
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, X-Visitor-Id",
+      "Access-Control-Max-Age": "86400",
+    };
+    if (version) headers["X-Version"] = version;
+    return new Response(null, { status: 204, headers });
   }
 
   function wrap(response: Response, request: Request): Response {
@@ -39,6 +38,7 @@ function create(allowedOrigins?: string) {
     }
     headers.set("X-Content-Type-Options", "nosniff");
     headers.set("X-Frame-Options", "DENY");
+    if (version) headers.set("X-Version", version);
     return new Response(response.body, {
       status: response.status,
       statusText: response.statusText,

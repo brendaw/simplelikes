@@ -12,11 +12,13 @@ interface Env {
   RATE_LIMIT_PER_IP?: string;
   RATE_LIMIT_GLOBAL_GET?: string;
   RATE_LIMIT_GLOBAL_POST?: string;
+  VERSION?: string;
 }
 
 interface HandlerOptions {
   allowedOrigins?: string;
   integrationTestSecret?: string;
+  version?: string;
   ctx?: ExecutionContext;
 }
 
@@ -26,7 +28,7 @@ export async function handleRequest(
   options: HandlerOptions = {},
 ): Promise<Response> {
   const cache = createCache(options.ctx);
-  const c = cors.create(options.allowedOrigins);
+  const c = cors.create(options.allowedOrigins, options.version);
 
   if (request.method === "OPTIONS") {
     return c.handlePreflight(request);
@@ -84,6 +86,7 @@ export default {
     return handleRequest(request, storage, {
       allowedOrigins: env.ALLOWED_ORIGINS,
       integrationTestSecret: env.INTEGRATION_TEST_SECRET,
+      version: env.VERSION,
       ctx,
     });
   },
