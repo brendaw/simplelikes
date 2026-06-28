@@ -106,10 +106,10 @@ jobs:
         run: |
           if [ "${{ needs.deploy-production.result }}" = "success" ]; then
             echo "environment=production" >> "$GITHUB_OUTPUT"
-            echo "url=https://simplelikes.william-brendaw.workers.dev" >> "$GITHUB_OUTPUT"
+            echo "url=${{ secrets.INTEGRATION_TEST_URL_PRODUCTION }}" >> "$GITHUB_OUTPUT"
           else
             echo "environment=staging" >> "$GITHUB_OUTPUT"
-            echo "url=https://simplelikes-staging.william-brendaw.workers.dev" >> "$GITHUB_OUTPUT"
+            echo "url=${{ secrets.INTEGRATION_TEST_URL_STAGING }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run integration tests
