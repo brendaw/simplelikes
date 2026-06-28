@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0](https://github.com/brendaw/simplelikes/releases/tag/v1.1.0) - 2026-06-28
+
+### Added
+
+- Add global config for custom like text
+- Add custom like text with pluralization to simple-likes web component
+
+### Fixed
+
+- Split release flow — push main first, tag only after staging validation
+
+### Changed
+
+- Document custom text and global config for web component
+- Add web component tests and update CONTRIBUTING.md
+- Add custom text examples to widget.html demo
+
 ## [1.0.2](https://github.com/brendaw/simplelikes/releases/tag/v1.0.2) - 2026-06-28
 
 ### Changed
