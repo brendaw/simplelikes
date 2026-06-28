@@ -22,7 +22,7 @@ A minimal, standalone likes counter API. Drop-in anonymous likes for any static 
 - Slug validation — prevents path traversal and abuse
 - Anonymous — no login, no user data stored ([privacy policy](PRIVACY.md))
 - Cloudflare native — runs on Cloudflare Workers + D1, no external dependencies
-- Client script included — drop-in `<simple-likes>` custom element in `dist/simple-likes.js`
+- Client script included — drop-in `<simple-likes>` custom element in `dist/simplelikes.js`
 
 ## Quick start
 
@@ -248,10 +248,10 @@ The web component source is in `src/client/` (TypeScript). Build the bundle:
 npm run build:client
 ```
 
-This produces `dist/simple-likes.js` and `examples/simple-likes.js` — a single-file drop-in script.
+This produces `dist/simplelikes.js` and `examples/simplelikes.js` — a single-file drop-in script.
 
 ```html
-<script src="dist/simple-likes.js"></script>
+<script src="dist/simplelikes.js"></script>
 <script>
   window.__simpleLikesConfig = {
     apiUrl: "https://likes.yourdomain.com",
@@ -344,10 +344,10 @@ simplelikes/
 │       ├── rate-limit.ts     Per-IP + global rate limiting
 │       └── validate.ts       Slug validation
 ├── dist/
-│   └── simple-likes.js       Built client bundle
+│   └── simplelikes.js       Built client bundle
 ├── examples/
 │   ├── widget.html           Live demo
-│   └── simple-likes.js       Bundled client script (generated)
+│   └── simplelikes.js       Bundled client script (generated)
 ├── vitest.config.ts          Vitest config (coverage, thresholds)
 ├── tests/
 │   ├── unit/                 Unit tests

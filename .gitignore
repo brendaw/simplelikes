@@ -1,6 +1,6 @@
 node_modules/
 dist/
-examples/simple-likes.js
+examples/simplelikes.js
 *.min.js
 .env
 *.local

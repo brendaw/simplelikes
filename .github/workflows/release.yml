@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.tag }}
+          ref: "${{ inputs.tag }}"
           persist-credentials: false
 
       - uses: actions/setup-node@v6
@@ -59,15 +59,14 @@ jobs:
           # Client archive (frontend-only)
           CLIENT_DIR="dist/simplelikes-client-${TAG}"
           mkdir -p "${CLIENT_DIR}"
-          cp dist/simple-likes.js "${CLIENT_DIR}/"
-          cp dist/simple-likes.min.js "${CLIENT_DIR}/"
-          cd dist
-          zip -r "simplelikes-client-${TAG}.zip" "simplelikes-client-${TAG}/"
+          cp dist/simplelikes.js "${CLIENT_DIR}/"
+          cp dist/simplelikes.min.js "${CLIENT_DIR}/"
+          zip -r "${CLIENT_DIR}.zip" "${CLIENT_DIR}/"
 
           # API archive (self-host)
           API_DIR="dist/simplelikes-api-${TAG}"
           mkdir -p "${API_DIR}/scripts"
-          cp dist/simple-likes.js "${API_DIR}/"
+          cp dist/simplelikes.js "${API_DIR}/"
           cp -r src/ "${API_DIR}/src/"
           cp -r examples/ "${API_DIR}/examples/"
           cp package.json "${API_DIR}/"
@@ -78,15 +77,14 @@ jobs:
           cp LICENSE "${API_DIR}/"
           cp README.md "${API_DIR}/"
           [ -f scripts/setup.sh ] && cp scripts/setup.sh "${API_DIR}/scripts/"
-          zip -r "simplelikes-api-${TAG}.zip" "simplelikes-api-${TAG}/"
+          zip -r "${API_DIR}.zip" "${API_DIR}/"
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ steps.changelog.outputs.tag }}
+          tag_name: "${{ steps.changelog.outputs.tag }}"
           body_path: _release_notes.md
           files: |
             dist/simplelikes-client-${{ steps.changelog.outputs.tag }}.zip
             dist/simplelikes-api-${{ steps.changelog.outputs.tag }}.zip
-            dist/simple-likes.js
           generate_release_notes: false

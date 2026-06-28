@@ -45,7 +45,7 @@ We ask that you **do not disclose the vulnerability publicly** until a fix has b
 The following components are covered by this policy:
 
 - **Worker handler** — `src/index.ts`, `src/server.ts`, and all files in `src/`
-- **Client script** — `dist/simple-likes.js` (source in `src/client/`)
+- **Client script** — `dist/simplelikes.js` (source in `src/client/`)
 - **Database schema and queries** — `src/db/schema.sql` and storage adapters (`src/storage/`)
 - **CORS, rate limiting, and validation logic** — `src/utils/`
 

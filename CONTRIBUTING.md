@@ -92,7 +92,7 @@ npm run test:coverage
 
 ### Client-side tests
 
-The web component in `src/client/` (TypeScript source, bundled to `dist/simple-likes.js`) has its own test suite in `tests/unit/client/` using `happy-dom` for DOM emulation. If you modify the component, add or update tests in that directory.
+The web component in `src/client/` (TypeScript source, bundled to `dist/simplelikes.js`) has its own test suite in `tests/unit/client/` using `happy-dom` for DOM emulation. If you modify the component, add or update tests in that directory.
 
 ### Before submitting
 
