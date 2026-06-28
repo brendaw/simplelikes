@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.10](https://github.com/brendaw/simplelikes/releases/tag/v0.6.10) - 2026-06-27
+
+### Changed
+
+- Add SECURITY.md with vulnerability disclosure policy
+- Document trigger-release always() and transitive skip in MAINTAINERS.md
+
 ## [0.6.9](https://github.com/brendaw/simplelikes/releases/tag/v0.6.9) - 2026-06-27
 
 ### Changed
