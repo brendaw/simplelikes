@@ -20,7 +20,7 @@ A minimal, standalone likes counter API. Drop-in anonymous likes for any static 
 - CORS whitelist — only your domain can call the API
 - Rate limiting — per-IP (10 req/min) + global safeguard (500 GET/min, 50 POST/min)
 - Slug validation — prevents path traversal and abuse
-- Anonymous — no login, no user data stored
+- Anonymous — no login, no user data stored ([privacy policy](PRIVACY.md))
 - Cloudflare native — runs on Cloudflare Workers + D1, no external dependencies
 - Client script included — drop-in `<simple-likes>` custom element in `examples/simple-likes.js`
 
@@ -105,6 +105,12 @@ Read responses are cached at the edge using the **Cloudflare Cache API** to redu
 - The cache is **per-datacenter** — each Cloudflare edge location maintains its own copy; the first request after a write from a new region may still see stale data for up to the TTL
 - New endpoints only need to call `cache.wrap(request, ttl, fetchFn)` — see `src/utils/cache.ts`
 - **CORS headers are applied after cache retrieval**, not baked into cached responses — this guarantees every request gets `Access-Control-Allow-Origin` matching its own `Origin` header, regardless of cache state
+
+## Privacy
+
+simplelikes is **anonymous by design**: no IPs, User-Agents, cookies, or tracking data are stored. The only persisted data is the slug identifier and an opaque visitor hash.
+
+See [PRIVACY.md](PRIVACY.md) for the full privacy policy, data collection table, and a suggested disclosure snippet for site owners.
 
 ## Security
 
@@ -318,6 +324,7 @@ simplelikes/
 │   └── setup.sh              One-command setup script
 ├── .env.example              Env vars template — copy to .env (gitignored)
 ├── wrangler.toml.example     Wrangler config template — copy to wrangler.toml (gitignored)
+├── PRIVACY.md                Privacy policy and data collection disclosure
 ├── MAINTAINERS.md            Maintenance policies
 ├── CONTRIBUTING.md           Contribution guide
 ├── RELEASING.md              Release process
