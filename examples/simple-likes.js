@@ -3,11 +3,17 @@
  *
  * Usage:
  *   <simple-likes slug="hello-world"></simple-likes>
+ *   <simple-likes slug="pt" text="coração" text-plural="corações"></simple-likes>
  *
  *   <script src="simple-likes.js"></script>
  *   <script>window.__simpleLikesApiUrl = "https://likes.yourdomain.com";</script>
  *
- * The element renders a "N likes" button that:
+ * Attributes:
+ *   slug         — unique identifier for the likeable content (required)
+ *   text         — singular label, e.g. "like" or "coração" (default: "like")
+ *   text-plural  — plural label, e.g. "likes" or "corações" (default: text + "s")
+ *
+ * The element renders an "N {label}" button that:
  *   - Batch-fetches all counts on page load
  *   - Toggles like/unlike via POST on click with localStorage dedup
  *   - Shows error feedback (shake + fade) on network failure
@@ -37,7 +43,7 @@ SL_STYLE.textContent =
 document.head.appendChild(SL_STYLE);
 
 class SimpleLikes extends HTMLElement {
-  static observedAttributes = ['slug'];
+  static observedAttributes = ['slug', 'text', 'text-plural'];
 
   constructor() {
     super();
@@ -48,6 +54,14 @@ class SimpleLikes extends HTMLElement {
 
   get slug() {
     return this.getAttribute('slug') || '';
+  }
+
+  get text() {
+    return this.getAttribute('text') || 'like';
+  }
+
+  get textPlural() {
+    return this.getAttribute('text-plural') || this.text + 's';
   }
 
   connectedCallback() {
@@ -65,7 +79,8 @@ class SimpleLikes extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldVal, newVal) {
-    if (name === 'slug' && oldVal !== newVal && this._initialized) {
+    if (!this._initialized) return;
+    if (name === 'slug' && oldVal !== newVal) {
       const apiUrl = getApiUrl();
       fetch(apiUrl + '/likes/' + newVal)
         .then((r) => r.json())
@@ -75,6 +90,9 @@ class SimpleLikes extends HTMLElement {
           this._applyLikedState();
         })
         .catch(() => {});
+    }
+    if ((name === 'text' || name === 'text-plural') && oldVal !== newVal) {
+      this._updateCount();
     }
   }
 
@@ -116,14 +134,19 @@ class SimpleLikes extends HTMLElement {
   }
 
   _render() {
-    this.innerHTML = '<button class="sl-btn" aria-label="Like"><span class="sl-count">' + this._count + '</span> likes</button>';
+    const label = this._count === 1 ? this.text : this.textPlural;
+    this.innerHTML = '<button class="sl-btn" aria-label="' + this.text + '"><span class="sl-count">' + this._count + '</span> ' + label + '</button>';
     this._btn = this.querySelector('.sl-btn');
     this._countEl = this.querySelector('.sl-count');
     this._btn.addEventListener('click', () => this._handleClick());
   }
 
   _updateCount() {
-    if (this._countEl) this._countEl.textContent = this._count;
+    if (!this._btn) return;
+    const label = this._count === 1 ? this.text : this.textPlural;
+    this._btn.innerHTML = '<span class="sl-count">' + this._count + '</span> ' + label;
+    this._countEl = this._btn.querySelector('.sl-count');
+    this._btn.setAttribute('aria-label', this.text);
   }
 
   _applyLikedState() {
