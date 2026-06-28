@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.9](https://github.com/brendaw/simplelikes/releases/tag/v0.6.9) - 2026-06-27
+
+### Changed
+
+- Bump actions to Node 24 runtime (checkout@v7, setup-node@v6, gh-release@v3)
+
 ## [0.6.8](https://github.com/brendaw/simplelikes/releases/tag/v0.6.8) - 2026-06-27
 
 ### Changed
