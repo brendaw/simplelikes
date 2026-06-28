@@ -120,8 +120,7 @@ jobs:
           EXPECTED_ORIGIN: ${{ secrets.ALLOWED_ORIGINS }}
 
   trigger-release:
-    needs: integration-tests
-    if: success() && needs.integration-tests.outputs.environment == 'production'
+    needs: [integration-tests, deploy-production]
     permissions:
       actions: write
     runs-on: ubuntu-24.04
