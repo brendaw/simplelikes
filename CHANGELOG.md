@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.7](https://github.com/brendaw/simplelikes/releases/tag/v0.6.7) - 2026-06-27
+
+### Changed
+
+- Force trigger-release scheduling with always() to bypass transitive skip
+
 ## [0.6.6](https://github.com/brendaw/simplelikes/releases/tag/v0.6.6) - 2026-06-27
 
 ### Changed
