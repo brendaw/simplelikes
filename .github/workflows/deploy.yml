@@ -121,7 +121,7 @@ jobs:
 
   trigger-release:
     needs: integration-tests
-    if: github.event.inputs.environment == 'production'
+    if: always() && needs.integration-tests.result == 'success' && github.event.inputs.environment == 'production'
     permissions:
       actions: write
     runs-on: ubuntu-24.04
