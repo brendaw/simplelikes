@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { D1Storage } from "../src/storage/d1";
-import { Sqlite3Storage } from "../src/storage/sqlite";
+import { D1Storage } from "../../src/storage/d1";
+import { Sqlite3Storage } from "../../src/storage/sqlite";
 
 function mockDB() {
   const stmt = {
