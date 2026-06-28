@@ -174,8 +174,8 @@ if [[ "$tag_confirm" =~ ^[Yy]$ ]]; then
 else
 	echo ""
 	echo "Tag not pushed. When ready:"
-	echo "  git push origin $TAG"
-fi"
+  echo "  git push origin $TAG"
+fi
 
 if (( ${#CLOSE_ISSUES[@]} > 0 )); then
 	echo ""
