@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.2](https://github.com/brendaw/simplelikes/releases/tag/v1.1.2) - 2026-06-28
+
+### Changed
+
+- Ignore .DS_Store files
+- Consolidate config into window.__simpleLikesConfig
+
 ## [1.1.1](https://github.com/brendaw/simplelikes/releases/tag/v1.1.1) - 2026-06-28
 
 ### Fixed
