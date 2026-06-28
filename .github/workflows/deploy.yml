@@ -120,7 +120,8 @@ jobs:
           EXPECTED_ORIGIN: ${{ secrets.ALLOWED_ORIGINS }}
 
   trigger-release:
-    needs: [integration-tests, deploy-production]
+    needs: integration-tests
+    if: github.event.inputs.environment == 'production'
     permissions:
       actions: write
     runs-on: ubuntu-24.04
