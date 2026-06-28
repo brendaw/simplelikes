@@ -9,8 +9,8 @@
  *
  * The element renders a "N likes" button that:
  *   - Batch-fetches all counts on page load
- *   - Increments via POST on click with localStorage dedup
- *   - Toggles .liked class on already-liked slugs
+ *   - Toggles like/unlike via POST on click with localStorage dedup
+ *   - Shows error feedback (shake + fade) on network failure
  */
 
 function generateVisitorId() {
@@ -32,7 +32,8 @@ SL_STYLE.textContent =
   '.sl-btn{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border:1px solid #d0d0d0;border-radius:12px;background:#fafafa;font:inherit;font-size:0.85em;cursor:pointer;color:#666;transition:all .15s;line-height:1.6}' +
   '.sl-btn:hover{background:#f0f0f0;border-color:#bbb}' +
   '.sl-btn.liked{background:#fff0f0;border-color:#e74c3c;color:#e74c3c}' +
-  '.sl-btn.liked:hover{background:#ffe0e0}';
+  '.sl-btn.liked:hover{background:#ffe0e0}' +
+  '.sl-btn.error{background:#fff0f0;border-color:#999;color:#999;animation:sl-shake .3s}@keyframes sl-shake{25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-2px)}}';
 document.head.appendChild(SL_STYLE);
 
 class SimpleLikes extends HTMLElement {
@@ -156,7 +157,8 @@ class SimpleLikes extends HTMLElement {
         localStorage.removeItem('liked:' + this.slug);
       }
     } catch {
-      // Silently fail
+      this._btn.classList.add('error');
+      setTimeout(() => this._btn.classList.remove('error'), 2000);
     }
   }
 }

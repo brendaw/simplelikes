@@ -91,21 +91,7 @@ The repository includes an `.editorconfig` file. Most editors support it nativel
 
 ## Scripts
 
-| Script | Purpose |
-|---|---|
-| `npm run dev` | Start local dev server (loads `.env` automatically) |
-| `npm run dev:stop` | Stop local dev server |
-| `npm run dev:clean` | Remove `.wrangler/` (local D1 data and caches) |
-| `npm run dev:setup` | Apply schema to local D1 database (run after `dev:clean` or on first start) |
-| `npm run setup` | Auto-detect D1 databases, generate `.env`, apply schema |
-| `npm run db:migrate` | Apply schema to remote D1 databases |
-| `npm run typecheck` | TypeScript type checking |
-| `npm test` | Run unit tests (Vitest) |
-| `npm run test:coverage` | Run unit tests with coverage report (threshold: 95%) |
-| `npm run test:integration` | Run integration tests against staging (requires `INTEGRATION_TEST_SECRET` and `EXPECTED_ORIGIN`) |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run deploy` | Deploy to Cloudflare Workers |
-| `npm run serve` | Start standalone Node.js server (VPS / local SQLite — requires `better-sqlite3`) |
+See the [Scripts table in README.md](README.md#scripts) for the full list of available commands.
 
 `scripts/release.sh`, `scripts/changelog.sh`, and `scripts/setup.sh` are maintainer-only scripts. The setup is also available via `npm run setup` for contributors with Cloudflare access.
 
