@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.6](https://github.com/brendaw/simplelikes/releases/tag/v0.6.6) - 2026-06-27
+
+### Changed
+
+- Gate trigger-release on environment input instead of job output
+
 ## [0.6.5](https://github.com/brendaw/simplelikes/releases/tag/v0.6.5) - 2026-06-27
 
 ### Changed
