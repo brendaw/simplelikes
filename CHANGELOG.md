@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.5](https://github.com/brendaw/simplelikes/releases/tag/v0.6.5) - 2026-06-27
+
+### Changed
+
+- Fix trigger-release gating using needs instead of output comparison
+
 ## [0.6.4](https://github.com/brendaw/simplelikes/releases/tag/v0.6.4) - 2026-06-27
 
 ### Fixed
