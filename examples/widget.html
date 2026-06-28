@@ -65,15 +65,22 @@
     <simple-likes slug="demo-claps" text="clap"></simple-likes>
   </div>
 
+  <p><em>Global config (<code>window.__simpleLikesConfig</code>) is set below — tags without inline attributes use "star"/"stars". Inline attributes win over the global config.</em></p>
+
   <h2>Usage</h2>
-  <pre>&lt;simple-likes slug="my-post"&gt;&lt;/simple-likes&gt;
+  <pre>&lt;!-- Inline (takes precedence) --&gt;
 &lt;simple-likes slug="pt-post" text="coração" text-plural="corações"&gt;&lt;/simple-likes&gt;
 &lt;simple-likes slug="clap-post" text="clap"&gt;&lt;/simple-likes&gt;
 
-&lt;script src="simple-likes.js"&gt;&lt;/script&gt;
+&lt;!-- Global config (fallback for tags without inline attributes) --&gt;
 &lt;script&gt;
-  window.__simpleLikesApiUrl = "https://likes.yourdomain.com";
-&lt;/script&gt;</pre>
+  window.__simpleLikesConfig = {
+    text: "star",
+    "text-plural": "stars",
+  };
+&lt;/script&gt;
+
+&lt;script src="simple-likes.js"&gt;&lt;/script&gt;</pre>
 
   <h2>Styling</h2>
   <pre>.sl-btn.liked { color: #e74c3c; }
@@ -82,6 +89,7 @@ simple-likes { margin: 0 4px; }</pre>
 
   <script>
     window.__simpleLikesApiUrl = "http://localhost:8787";
+    window.__simpleLikesConfig = { text: "star", "text-plural": "stars" };
   </script>
   <script src="simple-likes.js"></script>
 </body>

@@ -6,7 +6,15 @@
  *   <simple-likes slug="pt" text="coração" text-plural="corações"></simple-likes>
  *
  *   <script src="simple-likes.js"></script>
- *   <script>window.__simpleLikesApiUrl = "https://likes.yourdomain.com";</script>
+ *   <script>
+ *     window.__simpleLikesApiUrl = "https://likes.yourdomain.com";
+ *     window.__simpleLikesConfig = { text: "coração", "text-plural": "corações" };
+ *   </script>
+ *
+ * Global config (window.__simpleLikesConfig) sets defaults for all tags:
+ *   text, text-plural
+ *
+ * Priority: inline attribute > global config > hardcoded default
  *
  * Attributes:
  *   slug         — unique identifier for the likeable content (required)
@@ -33,6 +41,10 @@ function getApiUrl() {
   return window.__simpleLikesApiUrl || '/likes';
 }
 
+function getConfig() {
+  return window.__simpleLikesConfig || {};
+}
+
 const SL_STYLE = document.createElement('style');
 SL_STYLE.textContent =
   '.sl-btn{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border:1px solid #d0d0d0;border-radius:12px;background:#fafafa;font:inherit;font-size:0.85em;cursor:pointer;color:#666;transition:all .15s;line-height:1.6}' +
@@ -57,11 +69,13 @@ class SimpleLikes extends HTMLElement {
   }
 
   get text() {
-    return this.getAttribute('text') || 'like';
+    const cfg = getConfig();
+    return this.getAttribute('text') || cfg.text || 'like';
   }
 
   get textPlural() {
-    return this.getAttribute('text-plural') || this.text + 's';
+    const cfg = getConfig();
+    return this.getAttribute('text-plural') || cfg['text-plural'] || this.text + 's';
   }
 
   connectedCallback() {
