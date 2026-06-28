@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.1](https://github.com/brendaw/simplelikes/releases/tag/v1.0.1) - 2026-06-28
+
+### Changed
+
+- Add coverage for configure() branches, X-Version header, and env var overrides
+
 ## [1.0.0](https://github.com/brendaw/simplelikes/releases/tag/v1.0.0) - 2026-06-28
 
 ### Added
