@@ -248,7 +248,7 @@ The web component source is in `src/client/` (TypeScript). Build the bundle:
 npm run build:client
 ```
 
-This produces `dist/simple-likes.js` — a single-file drop-in script.
+This produces `dist/simple-likes.js` and `examples/simple-likes.js` — a single-file drop-in script.
 
 ```html
 <script src="dist/simple-likes.js"></script>
@@ -346,16 +346,25 @@ simplelikes/
 ├── dist/
 │   └── simple-likes.js       Built client bundle
 ├── examples/
-│   └── widget.html           Live demo
+│   ├── widget.html           Live demo
+│   └── simple-likes.js       Bundled client script (generated)
 ├── vitest.config.ts          Vitest config (coverage, thresholds)
 ├── tests/
-│   ├── cache.test.ts             Unit: Cache API wrap + batchKey
-│   ├── cors.test.ts              Unit: CORS whitelist + security headers
-│   ├── handler.test.ts           Unit: full request routing with mocked D1
-│   ├── integration.test.ts       Integration against staging
-│   ├── likes.test.ts             Unit: validate utils
-│   ├── rate-limit.test.ts        Unit: rate limit logic
-│   └── storage.test.ts           Unit: D1Storage + Sqlite3Storage
+│   ├── unit/                 Unit tests
+│   │   ├── handler.test.ts       Handler routing with mocked D1
+│   │   ├── client/               Web component tests
+│   │   │   ├── config.test.ts
+│   │   │   ├── api.test.ts
+│   │   │   └── component.test.ts
+│   │   ├── utils/
+│   │   │   ├── cache.test.ts     Cache API wrap
+│   │   │   ├── cors.test.ts      CORS whitelist
+│   │   │   ├── rate-limit.test.ts
+│   │   │   └── validate.test.ts  Slug validation
+│   │   └── storage/
+│   │       └── storage.test.ts   D1 + SQLite storage
+│   └── e2e/
+│       └── integration.test.ts   Integration against staging
 ├── .github/
 │   ├── CODEOWNERS            Required reviewer (@brendaw)
 │   ├── FUNDING.yml           Support links
