@@ -10,41 +10,75 @@ beforeEach(() => {
 });
 
 describe("getCount", () => {
-  it("calls fetch with the correct URL", async () => {
+  it("calls fetch without type param by default", async () => {
     mockFetch.mockResolvedValue({
-      json: () => Promise.resolve({ slug: "my-slug", count: 5 }),
+      json: () => Promise.resolve({ slug: "my-slug", types: { artigos: 5 } }),
     });
     const result = await getCount("my-slug");
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/likes/my-slug"),
     );
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.not.stringContaining("?type="),
+    );
+    expect(result.types.artigos).toBe(5);
+  });
+
+  it("calls fetch with type query param when provided", async () => {
+    mockFetch.mockResolvedValue({
+      json: () => Promise.resolve({ slug: "my-slug", count: 5, type: "artigos" }),
+    });
+    const result = await getCount("my-slug", "artigos");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/likes/my-slug?type=artigos"),
+    );
     expect(result.count).toBe(5);
+    expect(result.type).toBe("artigos");
   });
 });
 
 describe("batchGet", () => {
-  it("sends a POST request with JSON body", async () => {
+  it("sends POST with slugs only", async () => {
     mockFetch.mockResolvedValue({
-      json: () => Promise.resolve({ slugs: { a: 1, b: 2 } }),
+      json: () =>
+        Promise.resolve({
+          types: { artigos: { slugs: { a: 1 } } },
+        }),
     });
-    const result = await batchGet(["a", "b"]);
+    const result = await batchGet(["a"]);
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/likes/batch"),
       expect.objectContaining({
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slugs: ["a", "b"] }),
+        body: JSON.stringify({ slugs: ["a"] }),
       }),
     );
-    expect(result.slugs.a).toBe(1);
+    expect(result.types.artigos.slugs.a).toBe(1);
+  });
+
+  it("sends POST with type when provided", async () => {
+    mockFetch.mockResolvedValue({
+      json: () =>
+        Promise.resolve({
+          types: { artigos: { slugs: { a: 1 } } },
+        }),
+    });
+    const result = await batchGet(["a"], "artigos");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/likes/batch"),
+      expect.objectContaining({
+        body: JSON.stringify({ slugs: ["a"], type: "artigos" }),
+      }),
+    );
   });
 });
 
 describe("toggleLike", () => {
-  it("sends POST with X-Visitor-Id and returns like response", async () => {
+  it("sends POST without type by default", async () => {
     mockFetch.mockResolvedValue({
       json: () =>
-        Promise.resolve({ slug: "my-slug", count: 1, liked: true }),
+        Promise.resolve({ slug: "my-slug", count: 1, liked: true, type: "untyped" }),
     });
     const result = await toggleLike("my-slug", "v123abc");
     expect(mockFetch).toHaveBeenCalledWith(
@@ -55,8 +89,25 @@ describe("toggleLike", () => {
           "Content-Type": "application/json",
           "X-Visitor-Id": "v123abc",
         },
+        body: JSON.stringify({}),
       }),
     );
     expect(result.liked).toBe(true);
+    expect(result.type).toBe("untyped");
+  });
+
+  it("sends POST with type when provided", async () => {
+    mockFetch.mockResolvedValue({
+      json: () =>
+        Promise.resolve({ slug: "my-slug", count: 1, liked: true, type: "artigos" }),
+    });
+    const result = await toggleLike("my-slug", "v123abc", "artigos");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/likes/my-slug"),
+      expect.objectContaining({
+        body: JSON.stringify({ type: "artigos" }),
+      }),
+    );
+    expect(result.type).toBe("artigos");
   });
 });
