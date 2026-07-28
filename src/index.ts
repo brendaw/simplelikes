@@ -1,7 +1,7 @@
 import { createCache } from "./utils/cache";
 import { cors } from "./utils/cors";
 import { rateLimit } from "./utils/rate-limit";
-import { validateSlug } from "./utils/validate";
+import { validateSlug, validateType } from "./utils/validate";
 import type { IStorage } from "./storage/types";
 import { D1Storage } from "./storage/d1";
 
@@ -35,26 +35,42 @@ export async function handleRequest(
   }
 
   const url = new URL(request.url);
+  const path = url.pathname;
+  const method = request.method;
 
   // Route: POST /likes/batch
-  if (request.method === "POST" && url.pathname === "/likes/batch") {
+  if (method === "POST" && path === "/likes/batch") {
     return handleBatch(request, storage, options.integrationTestSecret, c, cache);
+  }
+
+  // Route: GET /likes/types/:type
+  if (method === "GET" && path.startsWith("/likes/types/")) {
+    const typeSlug = path.replace("/likes/types/", "");
+    if (!typeSlug || typeSlug.includes("/")) {
+      return c.wrap(new Response("Not found", { status: 404 }), request);
+    }
+    return c.wrap(await handleGetTypeSlugs(storage, typeSlug, url), request);
+  }
+
+  // Route: GET /likes/types
+  if (method === "GET" && path === "/likes/types") {
+    return c.wrap(await handleGetTypes(storage), request);
   }
 
   const { reject, isTest } = checkIntegrationTest(request, options.integrationTestSecret);
   if (reject) return c.wrap(reject, request);
 
   // Route: GET|POST /likes/:slug
-  const slug = url.pathname.replace("/likes/", "");
+  const slug = path.replace("/likes/", "");
 
   const slugError = validateSlug(slug);
   if (slugError) {
     return c.wrap(new Response(slugError, { status: 400 }), request);
   }
 
-  if (!isTest && (request.method === "GET" || request.method === "POST")) {
-    if (!rateLimit.checkGlobal(request.method)) {
-      const retryAfter = rateLimit.retryAfter(request.method);
+  if (!isTest && (method === "GET" || method === "POST")) {
+    if (!rateLimit.checkGlobal(method)) {
+      const retryAfter = rateLimit.retryAfter(method);
       const res = new Response("Global rate limit exceeded", { status: 429, headers: { "Retry-After": String(retryAfter) } });
       return c.wrap(res, request);
     }
@@ -65,9 +81,9 @@ export async function handleRequest(
     return c.wrap(new Response("Rate limit exceeded", { status: 429 }), request);
   }
 
-  switch (request.method) {
+  switch (method) {
     case "GET":
-      return c.wrap(await handleGet(request, storage, slug, cache), request);
+      return c.wrap(await handleGet(request, storage, slug, cache, url), request);
     case "POST":
       return handlePost(request, storage, slug, c);
     default:
@@ -107,10 +123,29 @@ async function handleGet(
   storage: IStorage,
   slug: string,
   cache: ReturnType<typeof createCache>,
+  url: URL,
 ): Promise<Response> {
+  const typeParam = url.searchParams.get("type");
+
+  if (typeParam !== null) {
+    if (typeParam.length === 0) {
+      return new Response("Invalid type: must be non-empty", { status: 400 });
+    }
+
+    const typeError = validateType(typeParam);
+    if (typeError) {
+      return new Response(typeError, { status: 400 });
+    }
+
+    return cache.wrap(request, 60, async () => {
+      const count = await storage.getCount(slug, typeParam);
+      return Response.json({ slug, count, type: typeParam });
+    });
+  }
+
   return cache.wrap(request, 60, async () => {
-    const count = await storage.getCount(slug);
-    return Response.json({ slug, count });
+    const types = await storage.getTypeCounts(slug);
+    return Response.json({ slug, types });
   });
 }
 
@@ -125,22 +160,36 @@ async function handlePost(
     return c.wrap(new Response("X-Visitor-Id header required", { status: 400 }), request);
   }
 
-  const liked = await storage.hasVisitor(slug, visitorId);
+  let type = "untyped";
+  try {
+    const body = await request.json() as Record<string, unknown>;
+    if (body && typeof body.type === "string") {
+      const typeError = validateType(body.type);
+      if (typeError) {
+        return c.wrap(new Response(typeError, { status: 400 }), request);
+      }
+      type = body.type;
+    }
+  } catch {
+    // No body or invalid JSON — use default type
+  }
+
+  const liked = await storage.hasVisitor(slug, visitorId, type);
 
   if (liked) {
-    await storage.decrement(slug, visitorId);
-    const count = await storage.getCount(slug);
+    await storage.decrement(slug, visitorId, type);
+    const count = await storage.getCount(slug, type);
     return c.wrap(
-      Response.json({ slug, count, liked: false }),
+      Response.json({ slug, count, liked: false, type }),
       request,
     );
   }
 
-  await storage.increment(slug, visitorId);
+  await storage.increment(slug, visitorId, type);
 
-  const count = await storage.getCount(slug);
+  const count = await storage.getCount(slug, type);
   return c.wrap(
-    Response.json({ slug, count: count || 1, liked: true }),
+    Response.json({ slug, count: count || 1, liked: true, type }),
     request,
   );
 }
@@ -155,7 +204,7 @@ async function handleBatch(
   const { reject, isTest } = checkIntegrationTest(request, integrationTestSecret);
   if (reject) return c.wrap(reject, request);
 
-  let body: { slugs?: string[] };
+  let body: { slugs?: string[]; type?: string };
   try {
     body = await request.json();
   } catch {
@@ -177,7 +226,18 @@ async function handleBatch(
     }
   }
 
-  // Global rate limit — batch is a read operation, counts against GET limit
+  let type: string | undefined;
+  if (body.type !== undefined) {
+    if (typeof body.type !== "string") {
+      return c.wrap(new Response("Invalid type: must be a string", { status: 400 }), request);
+    }
+    const typeError = validateType(body.type);
+    if (typeError) {
+      return c.wrap(new Response(typeError, { status: 400 }), request);
+    }
+    type = body.type;
+  }
+
   if (!isTest && !rateLimit.checkGlobal("GET")) {
     const retryAfter = rateLimit.retryAfter("GET");
     const res = new Response("Global rate limit exceeded", { status: 429, headers: { "Retry-After": String(retryAfter) } });
@@ -189,13 +249,54 @@ async function handleBatch(
     return c.wrap(new Response("Rate limit exceeded", { status: 429 }), request);
   }
 
-  const key = await cache.batchKey(slugs);
+  const key = await cache.batchKey(slugs, type);
 
   return c.wrap(
     await cache.wrap(request, 30, async () => {
-      const result = await storage.batchGet(slugs);
-      return Response.json({ slugs: result });
+      const entries = await storage.batchGet(slugs, type);
+      const grouped: Record<string, Record<string, number>> = {};
+
+      for (const entry of entries) {
+        if (!grouped[entry.type]) {
+          grouped[entry.type] = {};
+        }
+        grouped[entry.type][entry.slug] = entry.count;
+      }
+
+      return Response.json({ types: grouped });
     }, key),
     request,
   );
+}
+
+async function handleGetTypes(storage: IStorage): Promise<Response> {
+  const types = await storage.getTypes();
+  return Response.json({ types });
+}
+
+async function handleGetTypeSlugs(
+  storage: IStorage,
+  type: string,
+  url: URL,
+): Promise<Response> {
+  if (type.length === 0) {
+    return new Response("Invalid type: must be non-empty", { status: 400 });
+  }
+
+  const typeError = validateType(type);
+  if (typeError) {
+    return new Response(typeError, { status: 400 });
+  }
+
+  const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || 25, 1), 100);
+  const offset = Math.max(Number(url.searchParams.get("offset")) || 0, 0);
+
+  const result = await storage.getTypeSlugs(type, limit, offset);
+
+  return Response.json({
+    type,
+    count: result.slugs.length,
+    total: result.total,
+    slugs: result.slugs,
+  });
 }

@@ -36,9 +36,9 @@ export function createCache(ctx?: ExecutionContext) {
       return response;
     },
 
-    async batchKey(slugs: string[]): Promise<string> {
-      const sorted = [...slugs].sort();
-      const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(sorted.join("\0")));
+    async batchKey(slugs: string[], type?: string): Promise<string> {
+      const raw = type ? `${type}\0${[...slugs].sort().join("\0")}` : [...slugs].sort().join("\0");
+      const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
       return "/__cache/" + Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
     },
   };
