@@ -25,7 +25,7 @@ interface SlQueue extends Array<SimpleLikes> {
 }
 
 export class SimpleLikes extends HTMLElement {
-  static observedAttributes = ["slug", "text", "text-plural"];
+  static observedAttributes = ["slug", "type", "text", "text-plural"];
 
   private _count = 0;
   private _initialized = false;
@@ -35,12 +35,21 @@ export class SimpleLikes extends HTMLElement {
     return this.getAttribute("slug") || "";
   }
 
+  get type(): string {
+    return this.getAttribute("type") || "";
+  }
+
   get text(): string {
     return resolveText(this);
   }
 
   get textPlural(): string {
     return resolveTextPlural(this);
+  }
+
+  private get _storageKey(): string {
+    const t = this.type;
+    return t ? "liked:" + this.slug + ":" + t : "liked:" + this.slug;
   }
 
   connectedCallback() {
@@ -64,7 +73,16 @@ export class SimpleLikes extends HTMLElement {
   ): void {
     if (!this._initialized) return;
     if (name === "slug" && oldVal !== newVal) {
-      getCount(newVal || "")
+      getCount(newVal || "", this.type || undefined)
+        .then((data) => {
+          this._count = data.count || 0;
+          this._updateCount();
+          this._applyLikedState();
+        })
+        .catch(() => {});
+    }
+    if (name === "type" && oldVal !== newVal && this.slug) {
+      getCount(this.slug, newVal || undefined)
         .then((data) => {
           this._count = data.count || 0;
           this._updateCount();
@@ -85,27 +103,25 @@ export class SimpleLikes extends HTMLElement {
     delete (window as any).__slQueue;
     if (queue.length === 0) return;
 
-    const slugs: string[] = [];
-    const seen: Record<string, boolean> = {};
+    const uniqueSlugs = new Set<string>();
+    const elements: { el: SimpleLikes; slug: string; type: string }[] = [];
+
     for (const el of queue) {
       const s = el.slug;
-      if (s && !seen[s]) {
-        seen[s] = true;
-        slugs.push(s);
-      }
+      const t = el.type || "untyped";
+      if (!s) continue;
+      uniqueSlugs.add(s);
+      elements.push({ el, slug: s, type: t });
     }
 
-    if (slugs.length === 0) return;
+    if (uniqueSlugs.size === 0) return;
 
-    batchGet(slugs)
+    batchGet([...uniqueSlugs])
       .then((data) => {
-        const counts = data.slugs || {};
-        for (const el of queue) {
-          if (el.slug) {
-            el._count = counts[el.slug] || 0;
-            el._updateCount();
-            el._applyLikedState();
-          }
+        for (const { el, slug, type } of elements) {
+          el._count = data.types?.[type]?.[slug] ?? 0;
+          el._updateCount();
+          el._applyLikedState();
         }
       })
       .catch(() => {});
@@ -137,7 +153,7 @@ export class SimpleLikes extends HTMLElement {
 
   private _applyLikedState(): void {
     if (!this.slug) return;
-    if (localStorage.getItem("liked:" + this.slug)) {
+    if (localStorage.getItem(this._storageKey)) {
       this._btn.classList.add("liked");
     }
   }
@@ -145,16 +161,17 @@ export class SimpleLikes extends HTMLElement {
   private async _handleClick(): Promise<void> {
     if (!this.slug) return;
     const visitorId = this._visitorId || (this._visitorId = generateVisitorId());
+    const type = this.type || undefined;
 
     try {
-      const data = await toggleLike(this.slug, visitorId);
+      const data = await toggleLike(this.slug, visitorId, type);
       this._count = data.count;
       this._updateCount();
       this._btn.classList.toggle("liked", data.liked!);
       if (data.liked) {
-        localStorage.setItem("liked:" + this.slug, "1");
+        localStorage.setItem(this._storageKey, "1");
       } else {
-        localStorage.removeItem("liked:" + this.slug);
+        localStorage.removeItem(this._storageKey);
       }
     } catch {
       this._btn.classList.add("error");
