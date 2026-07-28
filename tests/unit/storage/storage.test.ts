@@ -243,23 +243,27 @@ describe("Sqlite3Storage", () => {
     ]);
   });
 
-  it("getTypes returns aggregated type data", async () => {
-    await storage.increment("t1", "v1", "artigos");
-    await storage.increment("t2", "v1", "artigos");
-    await storage.increment("t3", "v1", "notas");
-    const types = await storage.getTypes();
-    expect(types).toEqual([
-      { type: "artigos", slug_count: 2, total_likes: 2 },
-      { type: "notas", slug_count: 1, total_likes: 1 },
-    ]);
-  });
+  describe("isolated queries", () => {
+    it("getTypes returns aggregated type data", async () => {
+      const fresh = new Sqlite3Storage(":memory:");
+      await fresh.increment("t1", "v1", "artigos");
+      await fresh.increment("t2", "v1", "artigos");
+      await fresh.increment("t3", "v1", "notas");
+      const types = await fresh.getTypes();
+      expect(types).toEqual([
+        { type: "artigos", slug_count: 2, total_likes: 2 },
+        { type: "notas", slug_count: 1, total_likes: 1 },
+      ]);
+    });
 
-  it("getTypeSlugs returns paginated slugs", async () => {
-    await storage.increment("p1", "v1", "artigos");
-    await storage.increment("p2", "v1", "artigos");
-    const result = await storage.getTypeSlugs("artigos", 10, 0);
-    expect(result.total).toBe(2);
-    expect(result.slugs).toHaveLength(2);
+    it("getTypeSlugs returns paginated slugs", async () => {
+      const fresh = new Sqlite3Storage(":memory:");
+      await fresh.increment("p1", "v1", "artigos");
+      await fresh.increment("p2", "v1", "artigos");
+      const result = await fresh.getTypeSlugs("artigos", 10, 0);
+      expect(result.total).toBe(2);
+      expect(result.slugs).toHaveLength(2);
+    });
   });
 
   it("reuses same database file across calls", async () => {

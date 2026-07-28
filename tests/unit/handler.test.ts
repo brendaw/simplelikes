@@ -254,8 +254,8 @@ describe("handler", () => {
       const body = await res.json();
 
       expect(res.status).toBe(200);
-      expect(body.types.artigos.slugs.a).toBe(3);
-      expect(body.types.notas.slugs.b).toBe(7);
+      expect(body.types.artigos.a).toBe(3);
+      expect(body.types.notas.b).toBe(7);
     });
 
     it("filters by type when provided", async () => {
@@ -278,8 +278,8 @@ describe("handler", () => {
       const body = await res.json();
 
       expect(res.status).toBe(200);
-      expect(body.types.artigos.slugs.a).toBe(3);
-      expect(body.types.artigos.slugs.b).toBeUndefined();
+      expect(body.types.artigos.a).toBe(3);
+      expect(body.types.artigos.b).toBeUndefined();
     });
 
     it("returns 400 for empty slugs", async () => {

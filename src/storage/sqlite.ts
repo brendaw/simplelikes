@@ -10,7 +10,6 @@ export class Sqlite3Storage implements IStorage {
   private insertVisitorStmt: Database.Statement<[string, string, string]>;
   private decrementLikeStmt: Database.Statement<[string, string]>;
   private deleteVisitorStmt: Database.Statement<[string, string, string]>;
-  private batchGetStmt: (slugs: string[], type?: string) => BatchEntry[];
   private getTypesStmt: Database.Statement<[]>;
   private getTypeSlugsStmt: Database.Statement<[string, number, number]>;
   private getTypeSlugsCountStmt: Database.Statement<[string]>;
