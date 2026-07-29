@@ -1,7 +1,9 @@
 -- Run this against your D1 database to set up the schema:
 --   npx wrangler d1 execute simplelikes --file=src/db/schema.sql
 --
--- To migrate existing data from v1.x to v2.0, use scripts/migration-v2.sql
+-- To migrate existing data from v1.x to v2.0:
+--   1. Read CHANGELOG.md → Migration Guide
+--   2. Use scripts/migration-v1-to-v2.sql
 -- See CHANGELOG for breaking changes.
 
 CREATE TABLE IF NOT EXISTS likes (
