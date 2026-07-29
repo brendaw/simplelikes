@@ -213,6 +213,7 @@ Default allowed origins: `http://localhost:8787`. For production, set `ALLOWED_O
 - No `PUT`, `PATCH`, or `DELETE` — the API is intentionally minimal
 - Slugs follow `[a-z0-9/-]` pattern, max 200 chars
 - Max 50 slugs per batch request
+- Types follow `[a-z0-9-]` pattern, max 50 chars. `"untyped"` and `""` (empty) are reserved
 - All responses include CORS and security headers
 - Rate limits return `Retry-After` header with seconds until reset
 

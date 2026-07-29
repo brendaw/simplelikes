@@ -14,7 +14,8 @@ simplelikes is designed to be **anonymous by default**. This document explains w
 | localStorage (client-side) | ✅ Used by widget | Stores `liked:<slug>` flag for persistence across page loads — no personal data, never sent to the server |
 | Browser fingerprint | ❌ Not collected | `X-Visitor-Id` is a client-side hash, never sent raw |
 | Page URL | ❌ Not collected | Only the slug is sent (e.g., `hello-world`) |
-| Slug + count | ✅ Stored in D1/SQLite | The only persisted data |
+| Slug + count | ✅ Stored in D1/SQLite | Core like data |
+| Type (content category) | ✅ Stored in D1/SQLite | Optional category like `"artigos"` or `"notas"` — defaults to `"untyped"` if not specified |
 | Visitor hash | ✅ Stored in D1/SQLite | Opaque hash for deduplication, not reversible to PII |
 
 ### Visitor hash
@@ -23,7 +24,7 @@ The `X-Visitor-Id` header sent by the client script is a **simple hash of the br
 
 ## How data is used
 
-- **Like counts** (`slug` + `count`) are exposed via the API and displayed to visitors
+- **Like counts** (`slug` + `count` + `type`) are exposed via the API and displayed to visitors
 - **Visitor hashes** are used exclusively for deduplication (one like per visitor per slug) and are never exposed via the API
 - **IP addresses** are held temporarily in memory for rate limiting and discarded after the request completes — they are not logged, stored, or transmitted
 - **localStorage** (client-side only) stores a `liked:<slug>` flag so the widget remembers which slugs the visitor already liked across page loads — this data never leaves the browser

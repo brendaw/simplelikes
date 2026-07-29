@@ -14,9 +14,11 @@ A minimal, standalone likes counter API. Drop-in anonymous likes for any static 
 
 ## Features
 
-- `GET /likes/:slug` — returns current count
-- `POST /likes/:slug` — toggles like/unlike (dedup per visitor)
-- `POST /likes/batch` — returns counts for multiple slugs at once
+- `GET /likes/:slug` — returns counts grouped by type (without `?type=`) or count for a specific type (with `?type=`)
+- `GET /likes/types` — lists all types with aggregate slug and like counts
+- `GET /likes/types/:type` — returns paginated slugs for a type
+- `POST /likes/:slug` — toggles like/unlike (dedup per visitor), accepts optional `type` in body
+- `POST /likes/batch` — returns counts for multiple slugs grouped by type
 - CORS whitelist — only your domain can call the API
 - Rate limiting — per-IP (10 req/min) + global safeguard (500 GET/min, 50 POST/min)
 - Slug validation — prevents path traversal and abuse
@@ -37,61 +39,111 @@ The dev server starts at `http://localhost:8787`. No Cloudflare account needed �
 
 ```bash
 curl http://localhost:8787/likes/hello-world
-# {"slug":"hello-world","count":0}
+# {"slug":"hello-world","types":{}}
 
 curl -X POST http://localhost:8787/likes/hello-world \
   -H "X-Visitor-Id: visitor-1"
-# {"slug":"hello-world","count":1,"liked":true}
+# {"slug":"hello-world","count":1,"liked":true,"type":"untyped"}
+
+curl -X POST http://localhost:8787/likes/hello-world \
+  -H "X-Visitor-Id: visitor-1" \
+  -d '{"type":"artigos"}'
+# {"slug":"hello-world","count":1,"liked":true,"type":"artigos"}
 
 curl -X POST http://localhost:8787/likes/hello-world \
   -H "X-Visitor-Id: visitor-1"
-# {"slug":"hello-world","count":0,"liked":false}
+# {"slug":"hello-world","count":0,"liked":false,"type":"untyped"}
 ```
 
 ## API
 
 ### GET /likes/:slug
 
-Returns the current like count for a slug.
+Returns counts grouped by type. When `?type=` is omitted, all types for the slug are returned. When a specific `?type=` is provided, only that type's count is returned.
 
-```json
-{"slug":"hello-world","count":42}
+```bash
+# Without type — all types grouped
+curl http://localhost:8787/likes/hello-world
+# {"slug":"hello-world","types":{"artigos":42,"notas":7}}
+
+# With type — single type
+curl "http://localhost:8787/likes/hello-world?type=artigos"
+# {"slug":"hello-world","count":42,"type":"artigos"}
 ```
+
+`?type=untyped` and `?type=` (empty) return `400` — use the no-parameter variant to access untyped data.
 
 ### POST /likes/:slug
 
-Toggles the like for a visitor. Requires `X-Visitor-Id` header (a hash of User-Agent + IP, generated client-side). If the visitor hasn't liked this slug yet, it increments the count. If they already liked it, it decrements and removes their visitor record. Returns `liked: true` after a like, `liked: false` after an unlike.
+Toggles the like for a visitor. Requires `X-Visitor-Id` header (a hash of User-Agent + IP, generated client-side). If the visitor hasn't liked this slug yet, it increments the count. If they already liked it, it decrements and removes their visitor record.
 
-```json
-{"slug":"hello-world","count":43,"liked":true}
+Accepts an optional `type` field in the JSON body (defaults to `"untyped"`). The type is a content category like `"artigos"` or `"notas"` — `"untyped"` and `""` are reserved.
+
+```bash
+curl -X POST http://localhost:8787/likes/hello-world \
+  -H "X-Visitor-Id: visitor-1" \
+  -H "Content-Type: application/json" \
+  -d '{"type":"artigos"}'
+# {"slug":"hello-world","count":43,"liked":true,"type":"artigos"}
+
+# Without type — defaults to "untyped"
+curl -X POST http://localhost:8787/likes/hello-world \
+  -H "X-Visitor-Id: visitor-1" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+# {"slug":"hello-world","count":1,"liked":true,"type":"untyped"}
 ```
 
 ### POST /likes/batch
 
-Returns counts for multiple slugs in a single request. A batch **read** operation — no likes are created, only fetched.
+Returns counts for multiple slugs grouped by type. A batch **read** operation — no likes are created, only fetched.
 
 **Use cases:**
 - **Home page** — show like counts for the latest 5 posts, 3 notes, and 5 curated links in one call
 - **Archive/category pages** — load counts for all items in a listing without N individual requests
 - **Sidebar widgets** — "most liked" or "trending" widgets that need counts for multiple slugs
 
+Accepts an optional `type` field to filter results to a single type.
+
 ```bash
+# All types
 curl -X POST https://likes.yourdomain.com/likes/batch \
   -H "Content-Type: application/json" \
   -d '{"slugs":["hello-world","my-post","note-1"]}'
-```
+# {"types":{"artigos":{"hello-world":42,"my-post":7},"notas":{"note-1":3}}}
 
-```json
-{"slugs":{"hello-world":42,"my-post":7,"note-1":0}}
+# Filter by type
+curl -X POST https://likes.yourdomain.com/likes/batch \
+  -H "Content-Type: application/json" \
+  -d '{"slugs":["hello-world","my-post"],"type":"artigos"}'
+# {"types":{"artigos":{"hello-world":42,"my-post":7}}}
 ```
 
 **Design note:** This endpoint uses `POST` instead of `GET` because it carries a JSON body with the list of slugs. `GET` with a request body has no defined semantics per RFC 9110 §9.3.1 and may be rejected by proxies/CDNs. The `POST`-for-read pattern is the industry standard for batch reads — the same approach used by Elasticsearch (`POST /_search`), GraphQL (`POST /graphql`), and OData (`POST /$batch`). Despite using `POST`, this is a **read operation** for rate limiting purposes.
+
+### GET /likes/types
+
+Returns all types with aggregate slug and like counts.
+
+```bash
+curl http://localhost:8787/likes/types
+# {"types":[{"type":"artigos","slug_count":5,"total_likes":42},{"type":"notas","slug_count":3,"total_likes":15}]}
+```
+
+### GET /likes/types/:type
+
+Returns paginated slugs for a specific type. `/likes/types/untyped` returns `400`.
+
+```bash
+curl "http://localhost:8787/likes/types/artigos?limit=10&offset=0"
+# {"type":"artigos","slugs":[{"slug":"hello-world","count":42}],"total":1}
+```
 
 ### Errors
 
 | Status | Reason |
 |---|---|
-| 400 | Invalid slug or missing `X-Visitor-Id` |
+| 400 | Invalid slug, missing `X-Visitor-Id`, invalid type, or reserved type `"untyped"` |
 | 405 | Method not allowed |
 | 429 | Rate limit exceeded (includes `Retry-After` header) |
 
@@ -102,7 +154,9 @@ Read responses are cached at the edge using the **Cloudflare Cache API** to redu
 | Endpoint | Cache TTL | Cache key |
 |---|---|---|
 | `GET /likes/:slug` | 60s | Request URL |
-| `POST /likes/batch` | 30s | SHA-256 hash of sorted slugs |
+| `GET /likes/types` | 60s | Request URL |
+| `GET /likes/types/:type` | 60s | Request URL |
+| `POST /likes/batch` | 30s | SHA-256 hash of sorted slugs + type |
 
 - Only **200 OK** responses are cached — errors and 4xx pass through
 - On cache hit, the response is returned instantly without querying D1
@@ -129,6 +183,7 @@ simplelikes is designed with defense in depth:
 | Per-IP rate limit | 10 requests per minute per IP — primary defense against individual abuse |
 | Global rate limit | 500 GET/min, 50 POST/min — secondary layer protecting D1 free tier quota from coordinated attacks |
 | Slug validation | Regex-restricted: `[a-z0-9/-]`, max 200 chars |
+| Type validation | Alphanumeric + hyphens, max 50 chars, rejects reserved `"untyped"` |
 | Visitor dedup | `likes_visitors` table prevents double-counting per slug + visitor |
 | Security headers | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` |
 
@@ -260,6 +315,7 @@ This produces `dist/simplelikes.js` and `examples/simplelikes.js` — a single-f
 
 <simple-likes slug="hello-world"></simple-likes>
 <simple-likes slug="my-post"></simple-likes>
+<simple-likes slug="artigo-1" type="artigos"></simple-likes>
 ```
 
 ### Custom text
@@ -286,8 +342,9 @@ window.__simpleLikesConfig = {
 ```
 
 | Option | Type | Default | Description |
-|---|---|---|---|
+|---|---|---|---|---|
 | `apiUrl` | string | `"/likes"` | Base URL for the likes API |
+| `type` | string | `"untyped"` | Content category for segregation (e.g. `"artigos"`, `"notas"`) |
 | `text` | string | `"like"` | Default singular label for all tags |
 | `text-plural` | string | `text + "s"` | Default plural label for all tags |
 
@@ -375,9 +432,13 @@ simplelikes/
 │       ├── deploy.yml        Deploy → Integration tests → (if tag) Release
 │       └── release.yml       GitHub Release (workflow_dispatch only)
 ├── scripts/
-│   ├── release.sh            Automated release flow
-│   ├── changelog.sh          CHANGELOG generation from conventional commits
-│   └── setup.sh              One-command setup script
+│   ├── import-prod-to-local.ts     Import prod D1 dump to local SQLite
+│   ├── json-to-sql.ts              Convert wrangler JSON export to INSERTs
+│   ├── migration-v1-to-v2.sql      v1 → v2 schema migration (table recreation)
+│   ├── schema-v1.sql               Snapshot of v1 schema for migration testing
+│   ├── release.sh                  Automated release flow
+│   ├── changelog.sh                CHANGELOG generation from conventional commits
+│   └── setup.sh                    One-command setup script
 ├── .env.example              Env vars template — copy to .env (gitignored)
 ├── wrangler.toml.example     Wrangler config template — copy to wrangler.toml (gitignored)
 ├── PRIVACY.md                Privacy policy and data collection disclosure
