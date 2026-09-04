@@ -9,3 +9,4 @@ wrangler.toml
 coverage/
 data/
 .DS_Store
+prod-v1.db
