@@ -279,6 +279,8 @@ async function handleGetTypeSlugs(
   type: string,
   url: URL,
 ): Promise<Response> {
+  /* v8 ignore next 3 -- unreachable: the /likes/types/:type route guard already
+     rejects an empty typeSlug before this function is ever called */
   if (type.length === 0) {
     return new Response("Invalid type: must be non-empty", { status: 400 });
   }

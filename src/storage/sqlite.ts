@@ -121,6 +121,7 @@ export class Sqlite3Storage implements IStorage {
 
   getTypeSlugs(type: string, limit = 25, offset = 0): Promise<TypeSlugsResult> {
     const totalRow = this.getTypeSlugsCountStmt.get(type) as { total: number } | undefined;
+    /* v8 ignore next -- unreachable: a COUNT(*) aggregate always returns exactly one row */
     const total = totalRow?.total ?? 0;
     const rows = this.getTypeSlugsStmt.all(type, limit, offset) as { slug: string; count: number }[];
     return Promise.resolve({ slugs: rows, total });

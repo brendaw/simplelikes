@@ -37,3 +37,42 @@ describe("validateSlug", () => {
     expect(validateSlug("category/sub-category/post")).toBeNull();
   });
 });
+
+describe("validateType", () => {
+  it("accepts simple type", async () => {
+    const { validateType } = await import("../../../src/utils/validate");
+    expect(validateType("artigos")).toBeNull();
+  });
+
+  it("accepts type with hyphens and numbers", async () => {
+    const { validateType } = await import("../../../src/utils/validate");
+    expect(validateType("tipo-2")).toBeNull();
+  });
+
+  it("rejects empty type", async () => {
+    const { validateType } = await import("../../../src/utils/validate");
+    expect(validateType("")).not.toBeNull();
+  });
+
+  it("rejects overly long type", async () => {
+    const { validateType } = await import("../../../src/utils/validate");
+    expect(validateType("a".repeat(51))).not.toBeNull();
+  });
+
+  it("accepts type at the max length boundary", async () => {
+    const { validateType } = await import("../../../src/utils/validate");
+    expect(validateType("a".repeat(50))).toBeNull();
+  });
+
+  it("rejects the reserved type 'untyped'", async () => {
+    const { validateType } = await import("../../../src/utils/validate");
+    expect(validateType("untyped")).not.toBeNull();
+  });
+
+  it("rejects type with uppercase or special chars", async () => {
+    const { validateType } = await import("../../../src/utils/validate");
+    expect(validateType("Artigos")).not.toBeNull();
+    expect(validateType("tipo_com_underscore")).not.toBeNull();
+    expect(validateType("tipo com espaco")).not.toBeNull();
+  });
+});

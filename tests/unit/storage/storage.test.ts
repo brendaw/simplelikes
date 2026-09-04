@@ -179,6 +179,18 @@ describe("D1Storage", () => {
     expect(result.slugs).toHaveLength(2);
     expect(result.slugs[0].slug).toBe("b");
   });
+
+  it("getTypeSlugs defaults total to 0 when count row is missing", async () => {
+    const db = mockDB();
+    db.stmt.first.mockResolvedValue(null);
+    db.stmt.all.mockResolvedValue({ results: [] });
+    const storage = new D1Storage(db as any);
+
+    const result = await storage.getTypeSlugs("empty-type", 10, 0);
+
+    expect(result.total).toBe(0);
+    expect(result.slugs).toHaveLength(0);
+  });
 });
 
 describe("Sqlite3Storage", () => {
