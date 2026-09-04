@@ -7,65 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Migration Guide (v1.x → v2.0)
+## [1.3.2](https://github.com/brendaw/simplelikes/releases/tag/v1.3.2) - 2026-09-04
 
-v2.0 introduces a `type` column for content segregation. The primary key changes
-from `(slug)` to `(slug, type)` — existing rows get `type = 'untyped'`.
+### Added
 
-**1. Export production data**
+- Track type backfill migration used in v2 rollout
+- Add type migration pipeline and documentation
+- Add type attribute support to SimpleLikes web component
+- Update api.ts and component.ts with type support
+- Implement type-aware GET, POST, batch and /likes/types endpoints
+- Add validateType function with reserved 'untyped' check
+- Implement type-aware methods in Sqlite3Storage
+- Implement type-aware methods in D1Storage
+- Update IStorage interface with type-aware methods
+- Add composite PK (slug, type) with 'untyped' default
 
-```bash
-npx wrangler d1 execute simplelikes --env production --remote \
-  --command "SELECT * FROM likes" --json > /tmp/likes-prod.json
+### Fixed
 
-npx wrangler d1 execute simplelikes --env production --remote \
-  --command "SELECT * FROM likes_visitors" --json > /tmp/likes-visitors-prod.json
-```
+- Align batch response format and isolate Sqlite3Storage tests
 
-**2. Validate migration locally**
+### Changed
 
-```bash
-# Reset local D1
-rm -rf .wrangler/
-
-# Create v1 schema
-npx wrangler d1 execute simplelikes --local --file=scripts/schema-v1.sql
-
-# Import production data as SQL
-npx tsx scripts/json-to-sql.ts
-npx wrangler d1 execute simplelikes --local --file=/tmp/prod-data.sql
-
-# Apply v2 migration
-npx wrangler d1 execute simplelikes --local --file=scripts/migration-v1-to-v2.sql
-
-# Verify schema and data
-npx wrangler d1 execute simplelikes --local \
-  --command "SELECT sql FROM sqlite_master WHERE type='table' AND name='likes'" --json
-
-npx wrangler d1 execute simplelikes --local \
-  --command "SELECT type,count(*) as rows FROM likes GROUP BY type" --json
-```
-
-**3. Run smoke tests locally**
-
-```bash
-DB_PATH=prod-v1.db ALLOWED_ORIGINS="*" npx tsx src/server.ts &
-curl -s http://localhost:3000/likes/<existing-slug>
-curl -s http://localhost:3000/likes/types
-```
-
-**4. Apply to production**
-
-```bash
-npx wrangler d1 execute simplelikes --env production --remote \
-  --file=scripts/migration-v1-to-v2.sql
-```
-
-**5. Deploy the v2 Worker**
-
-```bash
-npx wrangler deploy --env production
-```
+- Gitignore local production data dump
+- Update README, CONTRIBUTING, PRIVACY, and widget for v2 type field
 
 ## [1.3.1](https://github.com/brendaw/simplelikes/releases/tag/v1.3.1) - 2026-06-28
 
