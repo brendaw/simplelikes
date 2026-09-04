@@ -7,10 +7,14 @@ CHANGELOG="CHANGELOG.md"
 
 suggest_bump() {
 	local from="$1" to="${2:-HEAD}"
-	if git log "${from}..${to}" --pretty=format:"%s%n%b" | grep -qE "^[a-z]+(\([^)]*\))?!:|^BREAKING[- ]CHANGE"; then
+	# Use `grep -c` (reads to EOF) instead of `grep -q` (exits on first match).
+	# `-q` closes its end of the pipe early, which sends SIGPIPE to `git log`;
+	# under `pipefail` that non-zero exit makes the `if` see a false negative
+	# even when the match was found, silently under-reporting the bump.
+	if [ "$(git log "${from}..${to}" --pretty=format:"%s%n%b" | grep -cE "^[a-z]+(\([^)]*\))?!:|^BREAKING[- ]CHANGE")" -gt 0 ]; then
 		echo "major"; return
 	fi
-	if git log "${from}..${to}" --pretty=format:"%s" | grep -qE "^feat(\([^)]*\))?:"; then
+	if [ "$(git log "${from}..${to}" --pretty=format:"%s" | grep -cE "^feat(\([^)]*\))?:")" -gt 0 ]; then
 		echo "minor"; return
 	fi
 	echo "patch"
