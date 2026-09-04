@@ -7,7 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [1.3.2](https://github.com/brendaw/simplelikes/releases/tag/v1.3.2) - 2026-09-04
+## [2.0.0](https://github.com/brendaw/simplelikes/releases/tag/v2.0.0) - 2026-09-04
+
+### Migration Guide (v1.x → v2.0)
+
+v2.0 introduces a `type` column for content segregation. The primary key changes
+from `(slug)` to `(slug, type)` — existing rows get `type = 'untyped'`.
+
+**1. Export production data**
+
+```bash
+npx wrangler d1 execute simplelikes --env production --remote \
+  --command "SELECT * FROM likes" --json > /tmp/likes-prod.json
+
+npx wrangler d1 execute simplelikes --env production --remote \
+  --command "SELECT * FROM likes_visitors" --json > /tmp/likes-visitors-prod.json
+```
+
+**2. Validate migration locally**
+
+```bash
+# Reset local D1
+rm -rf .wrangler/
+
+# Create v1 schema
+npx wrangler d1 execute simplelikes --local --file=scripts/schema-v1.sql
+
+# Import production data as SQL
+npx tsx scripts/json-to-sql.ts
+npx wrangler d1 execute simplelikes --local --file=/tmp/prod-data.sql
+
+# Apply v2 migration
+npx wrangler d1 execute simplelikes --local --file=scripts/migration-v1-to-v2.sql
+
+# Verify schema and data
+npx wrangler d1 execute simplelikes --local \
+  --command "SELECT sql FROM sqlite_master WHERE type='table' AND name='likes'" --json
+
+npx wrangler d1 execute simplelikes --local \
+  --command "SELECT type,count(*) as rows FROM likes GROUP BY type" --json
+```
+
+**3. Run smoke tests locally**
+
+```bash
+DB_PATH=prod-v1.db ALLOWED_ORIGINS="*" npx tsx src/server.ts &
+curl -s http://localhost:3000/likes/<existing-slug>
+curl -s http://localhost:3000/likes/types
+```
+
+**4. Apply to production**
+
+```bash
+npx wrangler d1 execute simplelikes --env production --remote \
+  --file=scripts/migration-v1-to-v2.sql
+```
+
+**5. Backfill `type` from existing slug prefixes**
+
+```bash
+npx wrangler d1 execute simplelikes --env production --remote \
+  --file=scripts/migration-v2-typed.sql
+```
+
+**6. Deploy the v2 Worker**
+
+```bash
+npx wrangler deploy --env production
+```
 
 ### Added
 
